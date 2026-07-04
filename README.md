@@ -56,14 +56,23 @@ dermaface-ai/
 
 ## Getting started
 
-> No implementation code yet — this is the project scaffold. Setup steps below are the intended flow.
+The package scaffold is in place: modules import, smoke tests pass, and the app
+runs in **placeholder mode** (dummy predictions) until a model is trained. Each
+owner fills in the `TODO(...)`/`NotImplementedError` stubs in their area.
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/neuroarcane/dermaface-ai
 cd dermaface-ai
 python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+make dev-install          # editable install + dev + runtime deps
+
+make test                 # smoke tests (no model/torch needed)
+make app                  # launch the Streamlit demo (placeholder mode)
+make train                # NotImplementedError until the loop is written
 ```
+
+See the `Makefile` for all tasks. Module ownership is noted at the top of each
+file and in [docs/team-roles.md](docs/team-roles.md).
 
 ## Team & timeline
 
