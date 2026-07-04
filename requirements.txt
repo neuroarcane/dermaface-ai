@@ -1,0 +1,32 @@
+# DermaFace AI — dependencies (proposed; pin versions once environment is set up)
+
+# Core ML
+torch
+torchvision
+numpy
+pandas
+scikit-learn
+Pillow
+
+# Explainability (Grad-CAM)
+grad-cam
+
+# App / demo
+streamlit
+# gradio            # alternative front-end — pick one
+
+# Experiment tracking (pick one)
+# wandb
+# mlflow
+
+# Viz / EDA
+matplotlib
+seaborn
+
+# Image dedup / quality
+imagehash
+
+# Dev
+pytest
+black
+ruff

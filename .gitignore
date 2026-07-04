@@ -1,0 +1,36 @@
+# Data & models (never commit images, PII, or weights)
+data/raw/*
+data/processed/*
+data/external/*
+!data/**/.gitkeep
+models/*
+!models/.gitkeep
+*.pt
+*.pth
+*.ckpt
+*.h5
+*.onnx
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+.ipynb_checkpoints/
+
+# Experiment tracking
+wandb/
+mlruns/
+lightning_logs/
+
+# Env & secrets
+.env
+*.key
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
