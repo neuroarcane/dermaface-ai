@@ -6,11 +6,11 @@ Five people, three weeks, run like an early-stage applied-AI startup. Titles are
 
 | # | Startup title | Person | Owns (accountable for) | Pipeline area |
 |---|---------------|--------|------------------------|---------------|
-| 1 | **CEO / Product Lead** | _(assign)_ | Vision, scope control, the *"screening & education, not diagnosis"* framing, instructor/stakeholder comms, demo story, final pitch deck, ethics & disclaimer honesty | Product spec, presentation |
-| 2 | **Chief Scientist / ML Research Lead** | _(assign)_ | Model architecture, transfer-learning choice, **severity-labeling methodology**, evaluation metrics, fairness across Fitzpatrick skin tones | Model + eval design |
-| 3 | **Data Engineer / ML Data Lead** | _(assign)_ | Sourcing & licensing the 3 datasets, cleaning, dedup, label harmonization, augmentation, train/val/test splits, class balance | Data pipeline |
-| 4 | **ML Engineer / MLOps** | _(assign)_ | Training infra, experiment tracking, **Grad-CAM implementation**, model export, inference pipeline, HF Spaces deploy, reproducibility | Training loop + serving |
-| 5 | **Full-stack / UX Engineer** | _(assign)_ | The app (Streamlit/Gradio), UI/UX, Grad-CAM overlay rendering, consent/disclaimer flow, user-facing copy, accessibility | Frontend + demo UX |
+| 1 | **CEO / Product Lead** | **Hessam** | Vision, scope control, the *"screening & education, not diagnosis"* framing, instructor/stakeholder comms, demo story, final pitch deck, ethics & disclaimer honesty | Product spec, presentation |
+| 2 | **Chief Scientist / ML Research Lead** | **Iva** | Model architecture, transfer-learning choice, **severity-labeling methodology**, evaluation metrics, fairness across Fitzpatrick skin tones | Model + eval design |
+| 3 | **Data Engineer / ML Data Lead** | **Aparna** | Sourcing & licensing the 3 datasets, cleaning, dedup, label harmonization, augmentation, train/val/test splits, class balance | Data pipeline |
+| 4 | **ML Engineer / MLOps** | **Varsha** | Training infra, experiment tracking, **Grad-CAM implementation**, model export, inference pipeline, HF Spaces deploy, reproducibility | Training loop + serving |
+| 5 | **Full-stack / UX Engineer** | **Ali** | The app (Streamlit/Gradio), UI/UX, Grad-CAM overlay rendering, consent/disclaimer flow, user-facing copy, accessibility | Frontend + demo UX |
 
 ## Shared co-ownership (where roles pair up)
 

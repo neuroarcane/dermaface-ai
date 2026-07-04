@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dermaface"
+version = "0.1.0"
+description = "Screening/education tool: classify acne/rosacea/redness severity from face photos with Grad-CAM."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "DermaFace AI Team" }]
+
+# Runtime deps are tracked in requirements.txt for the sprint.
+# Pin them here once the environment is stable.
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest", "black", "ruff"]
+
+[project.scripts]
+dermaface-train = "dermaface.training.train:main"
+dermaface-eval = "dermaface.training.evaluate:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
