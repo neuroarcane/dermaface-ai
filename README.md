@@ -78,6 +78,8 @@ file and in [docs/team-roles.md](docs/team-roles.md).
 
 Five-person team, three-week sprint, run like a small startup. See **[docs/team-roles.md](docs/team-roles.md)** and **[docs/project-plan.md](docs/project-plan.md)**.
 
+**Success criteria** (targets set up front, measured in the report): **[docs/requirements.md](docs/requirements.md)** → results tracked in **[docs/model-card.md](docs/model-card.md)**.
+
 ## License
 
 Code under the MIT License (see [LICENSE](LICENSE)). **Datasets carry their own licenses/usage terms** — review each before use; see [docs/data-strategy.md](docs/data-strategy.md).
