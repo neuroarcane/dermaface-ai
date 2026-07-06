@@ -24,10 +24,35 @@
 - **Fairness:** metrics stratified by Fitzpatrick skin type
 - **Test set:** frozen before modeling
 
-| Metric | Overall | By skin type (I–VI) |
-|---|---|---|
-| Accuracy | _tbd_ | _tbd_ |
-| Macro-F1 | _tbd_ | _tbd_ |
+### Target vs. Actual
+
+Targets are set up front in [requirements.md](requirements.md). Fill Actual +
+Interpretation after the frozen-test-set run.
+
+| Requirement | Target | Actual | Met? | Interpretation |
+|---|---|---|---|---|
+| P1 Beat majority baseline | Required | _tbd_ | _tbd_ | |
+| P2 Macro-F1 (4-class) | ≥ 0.60 | _tbd_ | _tbd_ | |
+| P3 Per-class recall | ≥ 0.50 each | _tbd_ | _tbd_ | |
+| P4 Severity within-1-band *(if in scope)* | ≥ 0.70 | _tbd_ | _tbd_ | |
+| Fa1 Macro-F1 gap across skin tones | ≤ 0.15 | _tbd_ | _tbd_ | |
+
+### Per-class results
+
+| Class | Precision | Recall | F1 | Support |
+|---|---|---|---|---|
+| acne | _tbd_ | _tbd_ | _tbd_ | _tbd_ |
+| rosacea | _tbd_ | _tbd_ | _tbd_ | _tbd_ |
+| redness | _tbd_ | _tbd_ | _tbd_ | _tbd_ |
+| clear | _tbd_ | _tbd_ | _tbd_ | _tbd_ |
+
+### By Fitzpatrick skin type (fairness)
+
+| Skin type | Accuracy | Macro-F1 | Support |
+|---|---|---|---|
+| I–II | _tbd_ | _tbd_ | _tbd_ |
+| III–IV | _tbd_ | _tbd_ | _tbd_ |
+| V–VI | _tbd_ | _tbd_ | _tbd_ |
 
 ## Limitations & biases
 - Data skew, approximate severity labels, no clinical validation, sensitivity to lighting/quality.
