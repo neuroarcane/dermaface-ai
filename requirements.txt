@@ -10,6 +10,7 @@ Pillow
 
 # Explainability (Grad-CAM)
 grad-cam
+opencv-python  # cv2 — face-presence check in the app
 
 # App / demo
 streamlit
