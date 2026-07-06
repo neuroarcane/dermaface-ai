@@ -122,7 +122,10 @@ def main() -> None:
         st.image(image, use_container_width=True)
     with col2:
         st.subheader("Grad-CAM")
-        st.caption("Regions that most influenced the estimate")
+        if result.placeholder:
+            st.caption("⚠️ Illustrative only — random weights, not medically meaningful yet.")
+        else:
+            st.caption("Regions that most influenced the estimate")
         overlay = result.heatmap_overlay
         if overlay is None:
             try:
@@ -136,10 +139,15 @@ def main() -> None:
     st.subheader("Estimate")
     if result.placeholder:
         st.error(result.note)
+    # In placeholder mode the numbers aren't real — show em-dashes instead of a
+    # misleading "clear / 0%" so nobody mistakes it for an actual prediction.
+    most_likely = "—" if result.placeholder else result.condition
+    severity = "—" if result.placeholder else result.severity
+    confidence = "—" if result.placeholder else f"{result.confidence:.0%}"
     c1, c2, c3 = st.columns(3)
-    c1.metric("Most likely", result.condition, help="Estimated — not a diagnosis")
-    c2.metric("Severity band", result.severity)
-    c3.metric("Confidence", f"{result.confidence:.0%}")
+    c1.metric("Most likely", most_likely, help="Estimated — not a diagnosis")
+    c2.metric("Severity band", severity)
+    c3.metric("Confidence", confidence)
     st.bar_chart(result.condition_probs)
 
     st.divider()
