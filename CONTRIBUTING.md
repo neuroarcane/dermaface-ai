@@ -4,10 +4,13 @@ Small team, fast sprint — keep it lightweight but disciplined.
 
 ## Workflow
 
-1. `main` is protected. Never commit to it directly.
-2. Branch: `feature/<area>-<short-desc>` (e.g. `feature/data-dedup`, `feature/app-gradcam-overlay`).
-3. Open a PR; **one teammate reviews** before merge.
-4. Keep PRs small and focused.
+We're a 5-person team on a 3-week sprint, so the process is deliberately light:
+**CI is the gatekeeper, not a mandatory human reviewer.**
+
+1. Work on a branch: `feature/<area>-<short-desc>` (e.g. `feature/data-dedup`, `feature/app-gradcam-overlay`). Avoid committing straight to `main`.
+2. Open a PR. **Self-merge is fine once CI is green** (`ruff` + `pytest` must pass) — you don't need to wait on a teammate.
+3. Review is *optional but encouraged*: tag the area owner if a change is risky or touches their code. Don't let a review block you.
+4. Keep PRs small and focused so CI stays fast and merges stay easy.
 
 ## Commit style
 
