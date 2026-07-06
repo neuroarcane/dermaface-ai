@@ -54,8 +54,20 @@ Interpretation after the frozen-test-set run.
 | III–IV | _tbd_ | _tbd_ | _tbd_ |
 | V–VI | _tbd_ | _tbd_ | _tbd_ |
 
+### Error analysis & failure cases
+
+Go beyond aggregate metrics — this is where analytical depth matters most (see
+[report-guide.md](report-guide.md)). Fill in after the test run.
+
+- **Most common confusions:** _(e.g. redness ↔ mild rosacea) — from the confusion matrix_
+- **Worst-performing subgroup:** _(which class / skin type / lighting) and by how much_
+- **Representative failure examples:** _2–4 misclassified images, with the Grad-CAM overlay and a note on what likely misled the model_
+- **Hypothesized causes:** _data skew? label noise? lesion vs. background? image quality?_
+- **What this means for a screening tool:** _which errors are "safe" vs. concerning, and why_
+
 ## Limitations & biases
 - Data skew, approximate severity labels, no clinical validation, sensitivity to lighting/quality.
+- Expand each into a sentence of *why* it matters and *how* it shows up in results.
 
 ## Ethical considerations
 - See [ethics-and-disclaimer.md](ethics-and-disclaimer.md).

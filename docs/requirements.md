@@ -52,6 +52,7 @@ the gap exceeds target, the report states it plainly and discusses causes
 | N3 | Notebook deliverable | Jupyter notebook (code + descriptions + end-of-notebook summary report incl. each member's contribution) **and** a PDF export |
 | N4 | Report contents | Dataset link + EDA plots, preprocessing, model (pretrained + fine-tune), training/validation curves, prediction, evaluation, interpretation, hardware/memory used, next steps, lessons learned |
 | N5 | Privacy | No user images stored; no PII/patient-identifying data in repo or demo |
+| N6 | Analytical depth | Every section justifies choices (why), notes alternatives & challenges, and interprets results in the screening context; includes a dedicated **failure-cases / error-analysis** section. See [report-guide.md](report-guide.md) |
 
 ## How we gauge performance
 

@@ -80,6 +80,8 @@ Five-person team, three-week sprint, run like a small startup. See **[docs/team-
 
 **Success criteria** (targets set up front, measured in the report): **[docs/requirements.md](docs/requirements.md)** → results tracked in **[docs/model-card.md](docs/model-card.md)**.
 
+**Writing the report:** **[docs/report-guide.md](docs/report-guide.md)** — section-by-section depth prompts + readiness checklist.
+
 ## License
 
 Code under the MIT License (see [LICENSE](LICENSE)). **Datasets carry their own licenses/usage terms** — review each before use; see [docs/data-strategy.md](docs/data-strategy.md).
