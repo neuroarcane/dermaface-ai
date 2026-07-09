@@ -121,9 +121,11 @@ reduce bottlenecks and improve quality.
 
 - **Standup:** async daily update (what I did / doing / blocked on) in the team
   channel.
-- **Branching:** `main` is protected; work on `feature/<area>-<short-desc>`.
-- **Review:** original owners approve major changes in their area; paired
-  contributors can open PRs and tag the owner.
+- **Branching:** work on `feature/<area>-<short-desc>`; avoid committing straight
+  to `main`.
+- **Merging:** CI (`ruff` + `pytest`) is the gate — **self-merge is fine once CI
+  is green; no approval required.** Review is optional but encouraged: tag the
+  area owner if a change is risky or touches their code.
 - **Definition of done:** code + docstring + tests or evidence + a note in the
-  relevant doc; no direct commits to `main`.
+  relevant doc.
 - **Weekly demo:** every Friday, whatever exists gets shown end-to-end.
