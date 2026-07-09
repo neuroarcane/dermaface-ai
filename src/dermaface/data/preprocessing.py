@@ -1,6 +1,7 @@
 """Image preprocessing and augmentation transforms.
 
-Owner: Aparna (Data Lead), with Iva (ML Research) on augmentation choices.
+Owner: Aparna (Data Lead), paired with Rolando (Data QA), with Iva
+(ML Research) on augmentation choices.
 
 Note: be careful with color augmentation — aggressive jitter can destroy the
 erythema/redness signal the model needs. Keep it mild.
@@ -47,6 +48,6 @@ def has_face(image_path: str) -> bool:
     """Return True if a face is detected in the image.
 
     Used to filter out non-face photos during cleaning.
-    TODO(Aparna): wire up a lightweight face detector (e.g. mediapipe / haar).
+    TODO(Aparna/Rolando): wire up a lightweight face detector (e.g. mediapipe / haar).
     """
     raise NotImplementedError

@@ -4,7 +4,7 @@ Small team, fast sprint — keep it lightweight but disciplined.
 
 ## Workflow
 
-We're a 5-person team on a 3-week sprint, so the process is deliberately light:
+We're a 7-person team on a 3-week sprint, so the process is deliberately light:
 **CI is the gatekeeper, not a mandatory human reviewer.**
 
 1. Work on a branch: `feature/<area>-<short-desc>` (e.g. `feature/data-dedup`, `feature/app-gradcam-overlay`). Avoid committing straight to `main`.

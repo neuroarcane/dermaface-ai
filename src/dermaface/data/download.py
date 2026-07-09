@@ -1,6 +1,6 @@
 """Dataset acquisition helpers.
 
-Owner: Aparna (Data Lead).
+Owner: Aparna (Data Lead), paired with Rolando (Data Pipeline & QA Support).
 
 Downloads/organizes the three source datasets into ``data/raw/``:
   - Fitzpatrick17k   https://github.com/mattgroh/fitzpatrick17k
@@ -30,7 +30,7 @@ def download_all(raw_dir: Path | None = None) -> None:
 def download_source(source: str, raw_dir: Path) -> None:
     """Download a single dataset by name into ``raw_dir/<source>``.
 
-    TODO(Aparna): implement per-source fetch. Each dataset has different
+    TODO(Aparna/Rolando): implement per-source fetch. Each dataset has different
     access mechanics (git-lfs, gsutil, manual form). Keep raw/ immutable.
     """
     if source not in SOURCES:
