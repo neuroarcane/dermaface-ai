@@ -3,8 +3,9 @@
 These are the targets the team commits to **before** modelling. The final report
 evaluates actual results against them (see [model-card.md](model-card.md)) — a
 target we miss is a valid result as long as we set it up front and analyse the
-gap. Numbers are owned by Iva (ML Research Lead) and may be revised once a
-baseline exists; any change is recorded here with a note.
+gap. Numbers are owned by Iva (ML Research Lead), with Temirlan supporting
+metric tests and evaluation outputs, and may be revised once a baseline exists;
+any change is recorded here with a note.
 
 > Status legend: ✅ met · 🟡 in progress · ⬜ not started
 
@@ -14,7 +15,7 @@ baseline exists; any change is recorded here with a note.
 |---|---|---|---|---|
 | F1 | Classify condition | Predicts one of acne / rosacea / redness / clear from a face photo | App demo + test-set metrics | 🟡 |
 | F2 | Localize affected regions | Grad-CAM overlay accompanies every prediction | Qualitative review of overlays | ✅ |
-| F3 | Severity estimate | Coarse band (mild / moderate / severe) **or** a documented decision to de-scope | Iva's Week-1 methodology decision | ⬜ |
+| F3 | Severity estimate | Coarse band (mild / moderate / severe) **or** a documented decision to de-scope | Iva's Week-1 methodology decision, with Temirlan supporting evaluation evidence | ⬜ |
 | F4 | Screening/education framing | Disclaimer shown before and alongside every result; no diagnostic language | UI review vs. ethics checklist | ✅ |
 
 ## 2. Performance targets (frozen test set)

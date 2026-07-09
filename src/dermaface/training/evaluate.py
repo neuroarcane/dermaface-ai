@@ -1,6 +1,7 @@
 """Evaluation entry point — runs the frozen test set and reports metrics.
 
-Owners: Iva (ML Research Lead) + Varsha (MLOps).
+Owners: Iva (ML Research Lead) + Varsha (MLOps), with Temirlan supporting
+evaluation outputs and explainability evidence.
 
 Run:
     python -m dermaface.training.evaluate
@@ -24,7 +25,7 @@ def parse_args() -> argparse.Namespace:
 def evaluate(cfg: Config, split: str = "test") -> dict:
     """Load the checkpoint, run inference on ``split``, return a metrics dict.
 
-    TODO(Iva/Varsha):
+    TODO(Iva/Varsha/Temirlan):
       - load model (build_model + state_dict from cfg.model_path)
       - run over the split's DataLoader collecting y_true / y_pred / skin_types
       - metrics.classification_metrics + metrics.fairness_by_skin_type
