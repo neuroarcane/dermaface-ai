@@ -33,6 +33,10 @@ DISCLAIMER = (
     "dermatologist or physician.** Do not use this tool to make treatment decisions."
 )
 
+# Below this confidence, a real prediction is flagged as unreliable.
+# Provisional threshold — Iva/Varsha can tune once real confidences exist.
+LOW_CONFIDENCE_THRESHOLD = 0.50
+
 
 @st.cache_data(show_spinner=False)
 def _compute_overlay(image_bytes: bytes):
@@ -148,6 +152,14 @@ def main() -> None:
     c1.metric("Most likely", most_likely, help="Estimated — not a diagnosis")
     c2.metric("Severity band", severity)
     c3.metric("Confidence", confidence)
+
+    # Low-confidence state: warn when a *real* prediction is below threshold.
+    if not result.placeholder and result.confidence < LOW_CONFIDENCE_THRESHOLD:
+        st.warning(
+            "⚠️ **Low confidence** — this estimate is uncertain and may well be "
+            "wrong. Please don't rely on it; see a dermatologist."
+        )
+
     st.bar_chart(result.condition_probs)
 
     st.divider()
