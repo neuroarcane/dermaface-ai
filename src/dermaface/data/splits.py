@@ -1,6 +1,7 @@
 """Train/val/test splitting — stratified by class AND Fitzpatrick skin type.
 
-Owner: Aparna (Data Lead), with Iva (ML Research) on the fairness rationale.
+Owner: Aparna (Data Lead), paired with Rolando (Data QA), with Iva
+(ML Research) on the fairness rationale.
 
 Stratifying by skin type is what makes the Week-2 fairness analysis possible.
 Freeze the test set early and never tune on it.
@@ -22,7 +23,7 @@ def make_splits(
 ) -> None:
     """Assign a ``split`` column to the manifest, stratified by (label, skin_type).
 
-    TODO(Aparna):
+    TODO(Aparna/Rolando):
       1. Load the manifest.
       2. Group by (label, skin_type); split each group by ``ratios``.
       3. Write the ``split`` column back. Persist a copy of the frozen test set.

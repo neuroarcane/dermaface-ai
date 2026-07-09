@@ -1,6 +1,7 @@
 """Single-image inference used by the app and CLI.
 
-Owners: Varsha (MLOps) + Ali (UI/UX).
+Owners: Varsha (MLOps) + Ali (UI/UX), with Temirlan validating model outputs
+needed for evaluation and explainability.
 
 Key design point: if no trained checkpoint is present at ``cfg.model_path``,
 ``predict`` returns a clearly-flagged PLACEHOLDER result so the app is runnable
@@ -29,7 +30,7 @@ class Prediction:
 def load_model(cfg: Config | None = None) -> Any | None:
     """Load the trained model, or return None if no checkpoint exists.
 
-    TODO(Varsha): build_model(cfg) + load_state_dict from cfg.model_path,
+    TODO(Varsha/Temirlan): build_model(cfg) + load_state_dict from cfg.model_path,
     move to eval() on the right device.
     """
     cfg = cfg or load_config()

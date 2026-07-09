@@ -1,6 +1,7 @@
 """Grad-CAM wrapper around the ``grad-cam`` package.
 
-Owners: Varsha (MLOps, compute) + Ali (UI/UX, overlay display).
+Owners: Varsha (MLOps, compute) + Ali (UI/UX, overlay display), with Temirlan
+supporting Grad-CAM evidence and conditional IoU/localization analysis.
 
 ``heatmap`` computes the class-activation map; ``overlay`` blends it onto the
 original image for the app. Works with any model built by

@@ -1,6 +1,7 @@
 """Training entry point.
 
-Owners: Varsha (MLOps, infra/tracking) + Iva (ML Research, loss/schedule).
+Owners: Varsha (MLOps, infra/tracking) + Iva (ML Research, loss/schedule),
+with Temirlan validating model outputs needed for evaluation and inference.
 
 Run:
     python -m dermaface.training.train            # uses defaults from config
@@ -51,7 +52,7 @@ def set_seed(seed: int) -> None:
 def train(cfg: Config) -> None:
     """Full training run.
 
-    TODO(Varsha/Iva):
+    TODO(Varsha/Iva/Temirlan):
       - build_dataloaders(cfg)  (dermaface.data.dataset)
       - build_model(cfg)        (dermaface.models)
       - loss (weighted CE for class imbalance), optimizer (AdamW), scheduler

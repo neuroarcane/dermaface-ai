@@ -76,7 +76,7 @@ file and in [docs/team-roles.md](docs/team-roles.md).
 
 ## Team & timeline
 
-Five-person team, three-week sprint, run like a small startup. See **[docs/team-roles.md](docs/team-roles.md)** and **[docs/project-plan.md](docs/project-plan.md)**.
+Seven-person team, three-week sprint, run like a small startup. See **[docs/team-roles.md](docs/team-roles.md)** and **[docs/project-plan.md](docs/project-plan.md)**.
 
 **Success criteria** (targets set up front, measured in the report): **[docs/requirements.md](docs/requirements.md)** → results tracked in **[docs/model-card.md](docs/model-card.md)**.
 
