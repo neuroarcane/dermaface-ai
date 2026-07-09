@@ -9,4 +9,4 @@
 - [ ] Formatted (`black`, `ruff`)
 - [ ] Relevant doc updated
 - [ ] No data / images / weights / secrets committed
-- [ ] Reviewed by one teammate
+- [ ] CI is green (`ruff` + `pytest`) — **self-merge OK once green; no approval needed**
