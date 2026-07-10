@@ -43,8 +43,7 @@ class Config:
     norm_std: tuple[float, float, float] = (0.229, 0.224, 0.225)
 
     # Model
-    backbone: str = "resnet50"  # torchvision backbone; TODO(Iva): revisit choice
-    pretrained: bool = True
+    backbone: str = "resnet50"  # Chosen as the v1 baseline: pretrained, reliable, and suitable for 224x224 image classification.    pretrained: bool = True
     num_classes: int = len(CLASS_NAMES)
 
     # Training
