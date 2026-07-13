@@ -1,71 +1,110 @@
-import numpy as np
-import pytest
+"""Evaluation metrics, including fairness-by-skin-tone.
 
-from dermaface.training.metrics import (
-    classification_metrics,
-    confusion,
-    fairness_by_skin_type,
+Owner: Iva (ML Research Lead), paired with Temirlan (Evaluation &
+Explainability Support).
+
+The fairness breakdown is a graded deliverable — see docs/model-card.md.
+"""
+
+from __future__ import annotations
+
+from typing import Any, Sequence
+
+from sklearn.metrics import (
+    accuracy_score,
+    confusion_matrix,
+    f1_score,
+    precision_score,
+    recall_score,
 )
 
 
-def test_classification_metrics_perfect_predictions():
-    y_true = [0, 1, 2, 3]
-    y_pred = [0, 1, 2, 3]
+def _validate_inputs(
+    y_true: Sequence[int],
+    y_pred: Sequence[int],
+) -> None:
+    """Validate that target and prediction lists can be evaluated."""
 
-    results = classification_metrics(y_true, y_pred)
+    if len(y_true) != len(y_pred):
+        raise ValueError("y_true and y_pred must have the same length.")
 
-    assert results["accuracy"] == pytest.approx(1.0)
-    assert results["macro_f1"] == pytest.approx(1.0)
-    assert results["macro_precision"] == pytest.approx(1.0)
-    assert results["macro_recall"] == pytest.approx(1.0)
-
-
-def test_classification_metrics_imperfect_predictions():
-    y_true = [0, 0, 1, 1]
-    y_pred = [0, 1, 1, 1]
-
-    results = classification_metrics(y_true, y_pred)
-
-    assert 0.0 <= results["accuracy"] <= 1.0
-    assert 0.0 <= results["macro_f1"] <= 1.0
-    assert 0.0 <= results["macro_precision"] <= 1.0
-    assert 0.0 <= results["macro_recall"] <= 1.0
+    if len(y_true) == 0:
+        raise ValueError("y_true and y_pred cannot be empty.")
 
 
-def test_fairness_by_skin_type():
-    y_true = [0, 1, 0, 1]
-    y_pred = [0, 1, 1, 1]
-    skin_types = ["I", "I", "VI", "VI"]
+def classification_metrics(
+    y_true: Sequence[int],
+    y_pred: Sequence[int],
+) -> dict[str, float]:
+    """Return accuracy, macro-F1, macro precision, and macro recall."""
 
-    results = fairness_by_skin_type(
-        y_true,
-        y_pred,
-        skin_types,
-    )
+    _validate_inputs(y_true, y_pred)
 
-    assert set(results.keys()) == {"I", "VI"}
-    assert results["I"]["sample_count"] == 2.0
-    assert results["VI"]["sample_count"] == 2.0
-    assert results["I"]["accuracy"] == pytest.approx(1.0)
-    assert results["VI"]["accuracy"] == pytest.approx(0.5)
+    return {
+        "accuracy": float(accuracy_score(y_true, y_pred)),
+        "macro_f1": float(
+            f1_score(y_true, y_pred, average="macro", zero_division=0)
+        ),
+        "macro_precision": float(
+            precision_score(
+                y_true,
+                y_pred,
+                average="macro",
+                zero_division=0,
+            )
+        ),
+        "macro_recall": float(
+            recall_score(
+                y_true,
+                y_pred,
+                average="macro",
+                zero_division=0,
+            )
+        ),
+    }
 
 
-def test_confusion_matrix():
-    y_true = [0, 0, 1, 1]
-    y_pred = [0, 1, 1, 1]
+def fairness_by_skin_type(
+    y_true: Sequence[int],
+    y_pred: Sequence[int],
+    skin_types: Sequence[str],
+) -> dict[str, dict[str, float]]:
+    """Return classification metrics separately for each skin type."""
 
-    matrix = confusion(y_true, y_pred)
+    _validate_inputs(y_true, y_pred)
 
-    expected = np.array(
-        [
-            [1, 1],
-            [0, 2],
+    if len(y_true) != len(skin_types):
+        raise ValueError(
+            "y_true, y_pred, and skin_types must have the same length."
+        )
+
+    results: dict[str, dict[str, float]] = {}
+
+    for skin_type in sorted(set(skin_types)):
+        indices = [
+            index
+            for index, value in enumerate(skin_types)
+            if value == skin_type
         ]
-    )
 
-    assert np.array_equal(matrix, expected)
+        group_y_true = [y_true[index] for index in indices]
+        group_y_pred = [y_pred[index] for index in indices]
+
+        group_metrics = classification_metrics(
+            group_y_true,
+            group_y_pred,
+        )
+        group_metrics["sample_count"] = float(len(indices))
+        results[skin_type] = group_metrics
+
+    return results
 
 
-def test_mismatched_lengths_raise_error():
-    with pytest.raises(ValueError):
-        classification_metrics([0, 1], [0])
+def confusion(
+    y_true: Sequence[int],
+    y_pred: Sequence[int],
+) -> Any:
+    """Return the confusion matrix for evaluation and reporting."""
+
+    _validate_inputs(y_true, y_pred)
+    return confusion_matrix(y_true, y_pred)
