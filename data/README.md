@@ -10,7 +10,10 @@
 
 ## Get the data
 
-See [../docs/data-strategy.md](../docs/data-strategy.md) for sources, licensing, and the processing pipeline. Owner: #3 Data Engineer.
+- **[raw-data-sources.md](raw-data-sources.md)** — Hessam's full reference on every candidate source (contents, access/download location, license terms, canonical folder names, required provenance fields).
+- **[../docs/data-strategy.md](../docs/data-strategy.md)** — sources, licensing, and the processing pipeline.
+
+Owner: Aparna + Rolando.
 
 ## `manifest.csv` schema (target)
 
