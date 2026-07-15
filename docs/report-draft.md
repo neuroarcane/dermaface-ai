@@ -54,6 +54,13 @@ professional care. *Not* a diagnostic device.
 
 Additional sources under license review (per Day-1 report): ACNE04, DDI (for fairness/eval).
 
+**Acquisition challenges (real, worth reporting):** most of **Fitzpatrick17k's** image
+source URLs are dead/migrated, so only a small fraction was directly downloadable — the team
+requested the images from the authors and is leaning on additional sources (SCIN downloaded
+cleanly; ACNE04/DDI under review) to compensate. The dataset **license also prohibits hosting
+images in a public repo**, so raw data is kept in external storage and never committed
+(consistent with the repo's gitignore). These are good "challenges + how we handled it" material.
+
 **Data analysis / EDA.** ⬜ *Pending data acquisition (Aparna + Rolando).* For images we will
 plot: class balance, Fitzpatrick skin-tone distribution, and image-quality summaries.
 
@@ -159,10 +166,10 @@ Process lessons so far:
 |---|---|
 | Hessam (Product Lead) | Scope, disclaimer/ethics framing, Day-1 setup report, coordination |
 | Iva (ML Research) | Backbone decision (ResNet50), severity method (concept-derived proxy), metrics implementation + tests |
-| Aparna + Rolando (Data) | Data acquisition, manifest, QA, EDA (starting) |
-| Varsha (MLOps) | Training loop / backbone code (Keras), benchmarking plan, CI |
-| Temirlan (Eval & Explainability) | Metrics test support, Grad-CAM evidence set, evaluation validation |
-| Ali (UI/UX) | Streamlit app (upload/consent/disclaimer/UI states), Grad-CAM overlay display, standups/sprint tracking |
+| Aparna + Rolando (Data) | Data acquisition in progress — SCIN downloaded; Fitzpatrick17k URLs mostly dead (authors emailed); manifest/QA/EDA to follow |
+| Varsha (MLOps) | Baseline **CNN + ResNet models ready** (Keras); training pending data; benchmarking plan; CI |
+| Temirlan (Eval & Explainability) | Metrics test support, Grad-CAM evidence set, evaluation validation (delayed by an ISP outage, now resolved) |
+| Ali (UI/UX) | Streamlit app (upload/consent/disclaimer/UI states), Grad-CAM overlay display, standups/sprint tracking; #1 decision write-up (`severity-decision.md` + draft `severity_map`) |
 
 ---
 
@@ -172,3 +179,9 @@ Process lessons so far:
 - **Decisions:** backbone = **ResNet50**; severity = **concept-derived proxy**; data acquisition owned by **Aparna + Rolando**; some of Temirlan's tasks reshuffled to Ali.
 - **Done:** Iva — backbone/severity decisions + metrics toy test; Ali — Streamlit app + consent flow.
 - **Blockers:** everything downstream (training, benchmarks, evaluation) waits on the dataset/manifest; a git branch-sync issue (since resolved).
+
+### Sprint 1, Standup 2 — 15 July 2026 (full notes: [standups/2026-07-15-standup2.md](standups/2026-07-15-standup2.md))
+- **Data trouble:** Fitzpatrick17k source URLs mostly dead → only a small portion downloaded; authors emailed; SCIN fine; may need ACNE04/DDI. **License forbids public-repo image hosting** → external storage only.
+- **Varsha (async):** baseline CNN + ResNet models ready; not yet trained (waiting on data).
+- **Unblock plan:** Aparna to share a partial dataset with Varsha so she can start a baseline.
+- **Blockers:** Fitzpatrick dead URLs; dataset licensing; Temirlan's ISP outage (resolved). **Data is the critical path and is slipping past this sprint.**
