@@ -3,6 +3,9 @@ data/raw/*
 data/processed/*
 data/external/*
 !data/**/.gitkeep
+# Small config/map artifacts ARE tracked (they're rules, not data/PII):
+!data/external/severity_map.csv
+!data/external/label_map.csv
 models/*
 !models/.gitkeep
 *.pt
