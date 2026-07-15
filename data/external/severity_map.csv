@@ -1,0 +1,10 @@
+type,key,value,notes
+band,n/a,0,clear class - no target condition
+band,mild,1-2,few or low-intensity inflammatory concepts
+band,moderate,3-4,multiple inflammatory concepts present
+band,severe,5+,extensive or pustular involvement
+weight,erythema,1,inflammatory redness
+weight,papule,1,small raised lesion
+weight,plaque,1,raised patch
+weight,scale,1,flaking
+weight,pustule,2,pus-filled lesion - stronger severity signal
