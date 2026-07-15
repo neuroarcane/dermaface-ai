@@ -10,3 +10,4 @@ Standup notes for the **DermaFace AI** project (mathematics / Deep Learning cour
 | Date | Notes |
 |---|---|
 | 2026-07-13 | [Sprint 1, Standup 1](2026-07-13-standup1.md) |
+| 2026-07-15 | [Sprint 1, Standup 2](2026-07-15-standup2.md) |
