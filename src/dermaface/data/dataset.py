@@ -4,14 +4,22 @@ Owner: Aparna (Data Lead), paired with Rolando (Data Pipeline & QA Support).
 
 The manifest (data/processed/manifest.csv) columns are documented in
 data/README.md: path, label, severity, skin_type, source, split.
+
+The module stays import-light: torch / torchvision are imported lazily inside
+the functions that need them, so ``import dermaface.data.dataset`` works in a
+plain environment (e.g. for the manifest/split unit tests). ``DermaFaceDataset``
+is duck-typed against ``torch.utils.data.Dataset`` (implements ``__len__`` /
+``__getitem__``), which is all ``DataLoader`` requires — so it can also be
+exercised with a non-torch transform in tests.
 """
 
 from __future__ import annotations
 
+import csv
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
-from dermaface.config import CLASS_NAMES, Config, load_config
+from dermaface.config import CLASS_NAMES, SPLIT_NAMES, Config, load_config
 from dermaface.data.preprocessing import build_transforms
 
 LABEL_TO_IDX = {name: i for i, name in enumerate(CLASS_NAMES)}
@@ -19,38 +27,172 @@ IDX_TO_LABEL = {i: name for name, i in LABEL_TO_IDX.items()}
 
 
 class DermaFaceDataset:
-    """Reads the manifest and yields (image_tensor, label_idx) pairs.
+    """Reads the manifest and yields ``(image_tensor, label_idx)`` pairs.
 
-    TODO(Aparna/Rolando): subclass ``torch.utils.data.Dataset`` and implement
-    ``__len__`` / ``__getitem__`` (load image via PIL, apply transform,
-    map label -> index). Kept framework-light here so the module imports
-    without torch installed.
+    Args:
+        manifest_path: path to ``manifest.csv``.
+        split: 'train' | 'val' | 'test'.
+        cfg: configuration (defaults to ``load_config()``).
+        transform: override the image transform (defaults to
+            ``build_transforms``). Injectable for testing without torchvision.
+        skip_missing: drop rows whose image file is absent (useful while images
+            are still downloading).
     """
 
-    def __init__(self, manifest_path: Path, split: str, cfg: Config | None = None) -> None:
+    def __init__(
+        self,
+        manifest_path: Path,
+        split: str,
+        cfg: Config | None = None,
+        *,
+        transform: Callable[[Any], Any] | None = None,
+        skip_missing: bool = False,
+    ) -> None:
         self.cfg = cfg or load_config()
         self.manifest_path = Path(manifest_path)
         self.split = split
-        self.transform = build_transforms(self.cfg, train=(split == "train"))
+        self.skip_missing = skip_missing
+        self.transform = transform if transform is not None else build_transforms(
+            self.cfg, train=(split == "train")
+        )
         self._rows: list[dict[str, Any]] = self._load_rows()
 
     def _load_rows(self) -> list[dict[str, Any]]:
         """Load and filter manifest rows for this split.
 
-        TODO(Aparna/Rolando): read CSV, filter by split, validate columns.
+        Reads the CSV, validates the schema, filters to ``self.split``, resolves
+        each image to an absolute path, and maps the string label to an index.
+        For the frozen test split, reads the immutable ``test_manifest.csv`` when
+        present.
         """
-        raise NotImplementedError
+        # Prefer the frozen per-split manifest (train/eval/test/demo) when present.
+        source = self.manifest_path
+        frozen = self.manifest_path.with_name(f"{self.split}_manifest.csv")
+        if frozen.exists():
+            source = frozen
+        if not source.exists():
+            raise FileNotFoundError(f"manifest not found at {source}")
+
+        with source.open(newline="", encoding="utf-8") as fh:
+            reader = csv.DictReader(fh)
+            required = {"path", "label", "skin_type", "split"}
+            missing = required - set(reader.fieldnames or [])
+            if missing:
+                raise ValueError(f"manifest {source} missing columns: {sorted(missing)}")
+
+            rows: list[dict[str, Any]] = []
+            for r in reader:
+                if r["split"] != self.split:
+                    continue
+                label = r["label"]
+                if label not in LABEL_TO_IDX:
+                    raise ValueError(f"unknown label {label!r} in {source}")
+                abs_path = (self.cfg.data_dir / r["path"]).resolve()
+                if self.skip_missing and not abs_path.exists():
+                    continue
+                rows.append(
+                    {
+                        "path": abs_path,
+                        "label": label,
+                        "label_idx": LABEL_TO_IDX[label],
+                        "skin_type": r.get("skin_type", "unknown"),
+                        "severity": r.get("severity", "n/a"),
+                        "source": r.get("source", ""),
+                    }
+                )
+        return rows
+
+    @property
+    def rows(self) -> list[dict[str, Any]]:
+        return self._rows
+
+    @property
+    def labels(self) -> list[int]:
+        return [r["label_idx"] for r in self._rows]
 
     def __len__(self) -> int:
         return len(self._rows)
 
+    def __getitem__(self, idx: int):
+        from PIL import Image  # lazy: keep module import cheap
 
-def build_dataloaders(cfg: Config | None = None) -> dict[str, Any]:
-    """Return {"train": ..., "val": ..., "test": ...} DataLoaders.
+        row = self._rows[idx]
+        with Image.open(row["path"]) as img:
+            image = img.convert("RGB")
+            tensor = self.transform(image)
+        return tensor, row["label_idx"]
 
-    TODO(Aparna/Rolando): construct DermaFaceDataset per split and wrap in
-    torch.utils.data.DataLoader with cfg.batch_size / cfg.num_workers.
-    Consider a WeightedRandomSampler for class imbalance (rosacea is rare).
+
+def _class_weights(labels: list[int], num_classes: int) -> list[float]:
+    """Inverse-frequency weight per sample, for a WeightedRandomSampler."""
+    counts = [0] * num_classes
+    for y in labels:
+        counts[y] += 1
+    freq = [c if c > 0 else 1 for c in counts]
+    per_class = [1.0 / f for f in freq]
+    return [per_class[y] for y in labels]
+
+
+def build_dataloaders(
+    cfg: Config | None = None,
+    *,
+    manifest_path: Path | None = None,
+    skip_missing: bool = False,
+    balance_train: bool = True,
+) -> dict[str, Any]:
+    """Return ``{"train": ..., "val": ..., "test": ...}`` DataLoaders.
+
+    Constructs a ``DermaFaceDataset`` per split and wraps each in a
+    ``torch.utils.data.DataLoader`` with ``cfg.batch_size`` / ``cfg.num_workers``.
+    The train loader uses a ``WeightedRandomSampler`` (inverse class frequency)
+    so rare classes like rosacea are not swamped — see module docstring.
+
+    Raises:
+        RuntimeError: if torch is not installed.
     """
     cfg = cfg or load_config()
-    raise NotImplementedError
+    manifest_path = manifest_path or cfg.manifest_path
+    try:
+        import torch
+        from torch.utils.data import DataLoader, WeightedRandomSampler
+    except ImportError as exc:  # pragma: no cover - environment dependent
+        raise RuntimeError(
+            "build_dataloaders requires torch. Install with `pip install -r requirements.txt`."
+        ) from exc
+
+    loaders: dict[str, Any] = {}
+    for split in SPLIT_NAMES:
+        ds = DermaFaceDataset(manifest_path, split, cfg, skip_missing=skip_missing)
+        if len(ds) == 0:
+            loaders[split] = None
+            continue
+        if split == "train" and balance_train:
+            weights = _class_weights(ds.labels, cfg.num_classes)
+            sampler = WeightedRandomSampler(
+                torch.as_tensor(weights, dtype=torch.double),
+                num_samples=len(ds),
+                replacement=True,
+            )
+            loaders[split] = DataLoader(
+                ds,
+                batch_size=cfg.batch_size,
+                sampler=sampler,
+                num_workers=cfg.num_workers,
+                drop_last=False,
+            )
+        else:
+            loaders[split] = DataLoader(
+                ds,
+                batch_size=cfg.batch_size,
+                shuffle=(split == "train"),
+                num_workers=cfg.num_workers,
+                drop_last=False,
+            )
+    return loaders
+
+
+if __name__ == "__main__":
+    dls = build_dataloaders()
+    for name, dl in dls.items():
+        n = len(dl.dataset) if dl is not None else 0
+        print(f"{name}: {n} samples")
