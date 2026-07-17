@@ -190,6 +190,11 @@ Process lessons so far:
 - **Unblock plan:** Aparna to share a partial dataset with Varsha so she can start a baseline.
 - **Blockers:** Fitzpatrick dead URLs; dataset licensing; Temirlan's ISP outage (resolved). **Data is the critical path and is slipping past this sprint.**
 
+### Sprint 1, Standup 3 — 17 July 2026 (full notes: [standups/2026-07-17-standup3.md](standups/2026-07-17-standup3.md))
+- **End of Sprint 1.** Data pipeline delivered (Aparna + Rolando); Aparna now on a Sprint-3 report task (~1 day). Varsha's one remaining task carried to the next sprint (failure-case analysis).
+- **Submission decision:** DermaFace is submitted to the sponsor as a **recorded video presentation** (online, not in person) — planned to record during next Friday's class.
+- **Absent:** Iva (internet issues — severity thresholds still pending), Temirlan (no update).
+
 ### Decisions after Standup 2
 - **2026-07-17 — Data pipeline delivered:** Rolando's PR acquires all 3 datasets (1,614 images via an MD5-matched Kaggle mirror, dodging the dead URLs), with harmonized manifest, label map, stratified frozen splits, QA report, and passing tests. Raw data stays out of git (license) — hosted on a shared team Google Drive.
 - **2026-07-17 — Framework = PyTorch:** team unified on PyTorch (the whole stack was already PyTorch; Varsha porting her Keras baseline over) to avoid a split model/dataloader stack.
