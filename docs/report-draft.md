@@ -83,6 +83,10 @@ erythema/redness signal the model needs.
 
 **Approach chosen: pretrained model + fine-tune (instruction option 3-2).**
 
+- **Framework: PyTorch** (decided 2026-07-17). *Why:* the rest of the stack is already
+  PyTorch — the package scaffold, the Streamlit app, Grad-CAM (pytorch-grad-cam), and the data
+  pipeline's `torch` dataloaders. A brief Keras baseline existed, but the team **unified on
+  PyTorch** to avoid a split model/dataloader stack; Varsha is porting her model to torchvision.
 - **Backbone: ResNet50** (ImageNet-pretrained). *Why:* reliable for transfer learning, strong
   performance/compute balance for 224×224 classification, well-supported. (Decision: Iva.)
 - **Alternatives considered:**
@@ -167,7 +171,7 @@ Process lessons so far:
 | Hessam (Product Lead) | Scope, disclaimer/ethics framing, Day-1 setup report, coordination |
 | Iva (ML Research) | Backbone decision (ResNet50), severity method (concept-derived proxy), metrics implementation + tests |
 | Aparna + Rolando (Data) | Data acquisition in progress — SCIN downloaded; Fitzpatrick17k URLs mostly dead (authors emailed); manifest/QA/EDA to follow |
-| Varsha (MLOps) | Baseline **CNN + ResNet models ready** (Keras); training pending data; benchmarking plan; CI |
+| Varsha (MLOps) | Baseline **CNN + ResNet models ready**; porting to **PyTorch** (team framework decision); training pending data; benchmarking plan; CI |
 | Temirlan (Eval & Explainability) | Metrics test support, Grad-CAM evidence set, evaluation validation (delayed by an ISP outage, now resolved) |
 | Ali (UI/UX) | Streamlit app (upload/consent/disclaimer/UI states), Grad-CAM overlay display, standups/sprint tracking; #1 decision write-up (`severity-decision.md` + draft `severity_map`) |
 
@@ -185,3 +189,7 @@ Process lessons so far:
 - **Varsha (async):** baseline CNN + ResNet models ready; not yet trained (waiting on data).
 - **Unblock plan:** Aparna to share a partial dataset with Varsha so she can start a baseline.
 - **Blockers:** Fitzpatrick dead URLs; dataset licensing; Temirlan's ISP outage (resolved). **Data is the critical path and is slipping past this sprint.**
+
+### Decisions after Standup 2
+- **2026-07-17 — Data pipeline delivered:** Rolando's PR acquires all 3 datasets (1,614 images via an MD5-matched Kaggle mirror, dodging the dead URLs), with harmonized manifest, label map, stratified frozen splits, QA report, and passing tests. Raw data stays out of git (license) — hosted on a shared team Google Drive.
+- **2026-07-17 — Framework = PyTorch:** team unified on PyTorch (the whole stack was already PyTorch; Varsha porting her Keras baseline over) to avoid a split model/dataloader stack.
