@@ -10,7 +10,11 @@ Pillow
 
 # Explainability (Grad-CAM)
 grad-cam
-opencv-python  # cv2 — face-presence check in the app
+# cv2 — face-presence check (preprocessing.has_face) + app helpers.
+# PINNED <5 deliberately: OpenCV 5.0 moved CascadeClassifier out of `objdetect`
+# into `xobjdetect` (opencv_contrib), so plain opencv-python>=5 cannot run the
+# Haar face detector. Either keep this pin, or switch to opencv-contrib-python.
+opencv-python<5
 
 # App / demo
 streamlit

@@ -20,6 +20,27 @@ SEVERITY_BANDS: list[str] = ["mild", "moderate", "severe", "n/a"]
 # Fitzpatrick skin types tracked for fairness analysis.
 FITZPATRICK_TYPES: list[str] = ["I", "II", "III", "IV", "V", "VI"]
 
+# --- Skin-tone bands (fairness reporting) -----------------------------------
+# The public dermatology datasets are heavily skewed toward lighter skin, so the
+# individual dark-skin types are too sparse to estimate per-group metrics from
+# (type VI is ~2% of our data). We therefore report fairness primarily on coarse
+# BANDS — the same I-II / III-IV / V-VI grouping the DDI dataset uses — and show
+# the per-type table alongside it with explicit sample sizes.
+SKIN_TONE_BANDS: dict[str, str] = {
+    "I": "I-II", "II": "I-II",
+    "III": "III-IV", "IV": "III-IV",
+    "V": "V-VI", "VI": "V-VI",
+}
+SKIN_TONE_BAND_NAMES: list[str] = ["I-II", "III-IV", "V-VI"]
+
+# Below this many samples, a per-group metric is too noisy to report unqualified.
+MIN_GROUP_N: int = 30
+
+
+def skin_tone_band(skin_type: str) -> str:
+    """Map a Fitzpatrick type ('I'..'VI') to its reporting band, else 'unknown'."""
+    return SKIN_TONE_BANDS.get(str(skin_type).strip().upper(), "unknown")
+
 # --- Dataset splits ---------------------------------------------------------
 # Four-way split. "eval" is the tuning/validation split; "test" is frozen and
 # never tuned on; "demo" is a tiny curated set reserved for the app demo.
@@ -48,6 +69,24 @@ class Config:
     norm_mean: tuple[float, float, float] = (0.485, 0.456, 0.406)
     norm_std: tuple[float, float, float] = (0.229, 0.224, 0.225)
 
+    # --- Augmentation (TRAIN SPLIT ONLY) ------------------------------------
+    # Applied on the fly at load time; eval/test/demo always get the
+    # deterministic resize+normalize pipeline so metrics stay comparable.
+    #
+    # ⚠️ COLOUR IS DELIBERATELY CONSTRAINED. Erythema (redness) is the visual
+    # signal that separates `redness`/`rosacea` from `clear`. Saturation and hue
+    # jitter attack exactly that signal, so both are pinned at 0.0 and
+    # brightness/contrast are kept small. Do not raise these without re-checking
+    # per-class recall for redness and rosacea.
+    aug_hflip_p: float = 0.5        # faces are roughly symmetric; safe
+    aug_rotation_deg: float = 10.0  # clinical photos are near-upright
+    aug_brightness: float = 0.10    # mild
+    aug_contrast: float = 0.10      # mild
+    aug_saturation: float = 0.0     # keep 0 — would distort erythema
+    aug_hue: float = 0.0            # keep 0 — would distort erythema
+    aug_scale_min: float = 0.85     # RandomResizedCrop lower bound (1.0 = no crop)
+    aug_erasing_p: float = 0.0      # optional occlusion robustness; off by default
+
     # Model
     # ResNet50 v1 baseline: ImageNet-pretrained, reliable for transfer learning.
     backbone: str = "resnet50"
@@ -65,6 +104,11 @@ class Config:
     def manifest_path(self) -> Path:
         """CSV manifest of the processed dataset (see data/README.md)."""
         return self.data_dir / "processed" / "manifest.csv"
+
+    @property
+    def clean_manifest_path(self) -> Path:
+        """Cleaned, training-ready manifest (QA-flagged rows removed)."""
+        return self.data_dir / "processed" / "manifest_clean.csv"
 
     @property
     def label_map_path(self) -> Path:

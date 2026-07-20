@@ -116,7 +116,12 @@ def make_splits(
         writer.writeheader()
         writer.writerows(rows)
 
-    # Persist one frozen manifest per split (train/eval/test/demo).
+    _write_split_manifests(rows, manifest_path)
+    return counts
+
+
+def _write_split_manifests(rows: list[dict], manifest_path: Path) -> None:
+    """Persist one frozen ``<split>_manifest.csv`` per split, beside the manifest."""
     for split in SPLIT_NAMES:
         out = manifest_path.with_name(f"{split}_manifest.csv")
         with out.open("w", newline="", encoding="utf-8") as fh:
@@ -124,6 +129,47 @@ def make_splits(
             writer.writeheader()
             writer.writerows([r for r in rows if r["split"] == split])
 
+
+def freeze_clean_splits(manifest_path: Path | None = None) -> dict[str, int]:
+    """Rewrite the frozen per-split manifests from the **cleaned** manifest.
+
+    This keeps every row's **existing** ``split`` assignment — nothing is
+    re-shuffled. The frozen test set therefore stays the same set of images it
+    always was, minus any rows the cleaning step dropped.
+
+    This is deliberately *not* ``make_splits``: re-running the stratified split on
+    the cleaned manifest would reassign images across train/eval/test and break
+    the Sprint-1 promise that the test set is frozen.
+
+    Returns a dict of split -> row count.
+    """
+    cfg = load_config()
+    if manifest_path is None:
+        manifest_path = (
+            cfg.clean_manifest_path if cfg.clean_manifest_path.exists() else cfg.manifest_path
+        )
+    manifest_path = Path(manifest_path)
+    if not manifest_path.exists():
+        raise FileNotFoundError(
+            f"manifest not found at {manifest_path}; run `make clean-manifest` first"
+        )
+
+    with manifest_path.open(newline="", encoding="utf-8") as fh:
+        rows = list(csv.DictReader(fh))
+    if not rows:
+        raise ValueError(f"manifest at {manifest_path} is empty")
+
+    unknown = sorted({r.get("split", "") for r in rows} - set(SPLIT_NAMES))
+    if unknown:
+        raise ValueError(f"rows carry unexpected split values {unknown}; expected {SPLIT_NAMES}")
+
+    # Write the per-split files next to the *processed* manifest so the loaders
+    # (which look for <split>_manifest.csv beside manifest.csv) pick them up.
+    _write_split_manifests(rows, cfg.manifest_path)
+
+    counts = {name: 0 for name in SPLIT_NAMES}
+    for r in rows:
+        counts[r["split"]] += 1
     return counts
 
 
