@@ -54,21 +54,38 @@ professional care. *Not* a diagnostic device.
 
 Additional sources under license review (per Day-1 report): ACNE04, DDI (for fairness/eval).
 
+**Acquisition challenges (real, worth reporting):** most of **Fitzpatrick17k's** image
+source URLs are dead/migrated, so only a small fraction was directly downloadable — the team
+requested the images from the authors and is leaning on additional sources (SCIN downloaded
+cleanly; ACNE04/DDI under review) to compensate. The dataset **license also prohibits hosting
+images in a public repo**, so raw data is kept in external storage and never committed
+(consistent with the repo's gitignore). These are good "challenges + how we handled it" material.
+
 **Data analysis / EDA.** ⬜ *Pending data acquisition (Aparna + Rolando).* For images we will
 plot: class balance, Fitzpatrick skin-tone distribution, and image-quality summaries.
 
 *Depth to add later:* why these datasets, their known biases, licensing constraints, what's
 missing, and how class/skin-tone skew is expected to affect results.
 
-## 2. Preprocessing ⬜ (planned)
+## 2. Preprocessing 🟡 (Sprint-2 data work done; Rolando + Aparna)
 
-Planned pipeline (see [data-strategy.md](data-strategy.md)): dedup (perceptual hash),
-drop corrupt/low-quality images, face-presence check, unify labels → {acne, rosacea,
-redness, clear}, stratified train/val/test/demo splits by **class and Fitzpatrick type**,
-frozen test set. Normalization uses ImageNet statistics.
+**Cleaning:** 1,614 → **1,559** rows — dropped 35 with unknown Fitzpatrick type and 21
+perceptual-hash duplicate images. Every surviving row validates (real class + real skin type,
+no unknowns).
 
-*Note:* color augmentation is kept **mild** on purpose — aggressive jitter would destroy the
-erythema/redness signal the model needs.
+**Class imbalance → weighted loss** (not oversampling). With only ~200 rosacea images,
+resampling would show the model the same few images repeatedly; instead, class weights are
+exported to `class_weights.json` (rosacea ≈ 3.1× acne) and applied in the loss. The sampler is
+off by default so we don't double-correct. *Why this over oversampling:* avoids overfitting to
+a handful of rare-class images.
+
+**Splits:** re-frozen from the cleaned rows with **original assignments preserved** (no
+reshuffle) — the frozen test set is the same images minus what cleaning removed; measured drift
+is **≤ 1 point** on every class and skin type, so stratification held. (seed 42)
+
+**Augmentation (train split only):** crop / flip / rotation + mild brightness/contrast.
+**Saturation and hue are locked at 0 on purpose** — jittering them washes out the erythema,
+which is the whole signal for redness/rosacea. A test fails if anyone raises them.
 
 *Depth to add later:* why each step; what didn't help; effect of augmentation choices.
 
@@ -76,6 +93,10 @@ erythema/redness signal the model needs.
 
 **Approach chosen: pretrained model + fine-tune (instruction option 3-2).**
 
+- **Framework: PyTorch** (decided 2026-07-17). *Why:* the rest of the stack is already
+  PyTorch — the package scaffold, the Streamlit app, Grad-CAM (pytorch-grad-cam), and the data
+  pipeline's `torch` dataloaders. A brief Keras baseline existed, but the team **unified on
+  PyTorch** to avoid a split model/dataloader stack; Varsha is porting her model to torchvision.
 - **Backbone: ResNet50** (ImageNet-pretrained). *Why:* reliable for transfer learning, strong
   performance/compute balance for 224×224 classification, well-supported. (Decision: Iva.)
 - **Alternatives considered:**
@@ -115,10 +136,19 @@ evaluation contract downstream stages use.
 **Results:** ⬜ pending training. Will report accuracy, macro-F1, per-class precision/recall,
 confusion matrix, and the **Target-vs-Actual** table with a one-line interpretation per row.
 
-## 8. Fairness analysis ⬜ (pending)
+## 8. Fairness analysis 🟡 (method decided; results pending)
 
-Metrics stratified by Fitzpatrick skin type; report the macro-F1 gap honestly even if it
-exceeds the ≤ 0.15 target, and discuss likely causes (data skew, small subgroup sizes).
+**Reporting decision:** report fairness across **skin-tone bands (I-II / III-IV / V-VI)** as
+the primary view (test-set n = 81 / 61 / 16), with the per-type I–VI table shown alongside
+**annotated with sample sizes**. *Why bands:* the test set has only **3 Fitzpatrick VI images**
+and **zero rosacea-on-VI**, so a per-type macro-F1 on n=3 is noise, not a measurement — a single
+error moves it ~33 points. Bands mirror the grouping the DDI dataset uses.
+
+**Limitation (state plainly in the report):** type VI is 1.9% of the dataset; per-type metrics
+for the darkest skin are not statistically meaningful and won't be reported as if they were.
+This skew originates in the source datasets (public dermatology collections lean toward lighter
+skin), **not** our sampling (stratified; ≤1pt drift). Full write-up + ready-to-paste paragraph:
+Rolando's `FAIRNESS_LIMITATION.md` (on the team Drive).
 
 ## 9. Explainability — Grad-CAM 🟡 (app done; evidence pending)
 
@@ -159,10 +189,10 @@ Process lessons so far:
 |---|---|
 | Hessam (Product Lead) | Scope, disclaimer/ethics framing, Day-1 setup report, coordination |
 | Iva (ML Research) | Backbone decision (ResNet50), severity method (concept-derived proxy), metrics implementation + tests |
-| Aparna + Rolando (Data) | Data acquisition, manifest, QA, EDA (starting) |
-| Varsha (MLOps) | Training loop / backbone code (Keras), benchmarking plan, CI |
-| Temirlan (Eval & Explainability) | Metrics test support, Grad-CAM evidence set, evaluation validation |
-| Ali (UI/UX) | Streamlit app (upload/consent/disclaimer/UI states), Grad-CAM overlay display, standups/sprint tracking |
+| Aparna + Rolando (Data) | Data acquisition + Sprint-2 cleaning: harmonized manifest, dedup + skin-type validation (1,614→1,559), weighted-loss imbalance handling, frozen splits (≤1pt drift), erythema-safe augmentation, QA + fairness-coverage findings |
+| Varsha (MLOps) | Baseline **CNN + ResNet models ready**; porting to **PyTorch** (team framework decision); training pending data; benchmarking plan; CI |
+| Temirlan (Eval & Explainability) | Metrics test support, Grad-CAM evidence set, evaluation validation (delayed by an ISP outage, now resolved) |
+| Ali (UI/UX) | Streamlit app (upload/consent/disclaimer/UI states), Grad-CAM overlay display, standups/sprint tracking; #1 decision write-up (`severity-decision.md` + draft `severity_map`) |
 
 ---
 
@@ -172,3 +202,21 @@ Process lessons so far:
 - **Decisions:** backbone = **ResNet50**; severity = **concept-derived proxy**; data acquisition owned by **Aparna + Rolando**; some of Temirlan's tasks reshuffled to Ali.
 - **Done:** Iva — backbone/severity decisions + metrics toy test; Ali — Streamlit app + consent flow.
 - **Blockers:** everything downstream (training, benchmarks, evaluation) waits on the dataset/manifest; a git branch-sync issue (since resolved).
+
+### Sprint 1, Standup 2 — 15 July 2026 (full notes: [standups/2026-07-15-standup2.md](standups/2026-07-15-standup2.md))
+- **Data trouble:** Fitzpatrick17k source URLs mostly dead → only a small portion downloaded; authors emailed; SCIN fine; may need ACNE04/DDI. **License forbids public-repo image hosting** → external storage only.
+- **Varsha (async):** baseline CNN + ResNet models ready; not yet trained (waiting on data).
+- **Unblock plan:** Aparna to share a partial dataset with Varsha so she can start a baseline.
+- **Blockers:** Fitzpatrick dead URLs; dataset licensing; Temirlan's ISP outage (resolved). **Data is the critical path and is slipping past this sprint.**
+
+### Sprint 1, Standup 3 — 17 July 2026 (full notes: [standups/2026-07-17-standup3.md](standups/2026-07-17-standup3.md))
+- **End of Sprint 1.** Data pipeline delivered (Aparna + Rolando); Aparna now on a Sprint-3 report task (~1 day). Varsha's one remaining task carried to the next sprint (failure-case analysis).
+- **Submission decision:** DermaFace is submitted to the sponsor as a **recorded video presentation** (online, not in person) — planned to record during next Friday's class.
+- **Absent:** Iva (internet issues — severity thresholds still pending), Temirlan (no update).
+
+### Decisions after Standup 2
+- **2026-07-17 — Data pipeline delivered:** Rolando's PR acquires all 3 datasets (1,614 images via an MD5-matched Kaggle mirror, dodging the dead URLs), with harmonized manifest, label map, stratified frozen splits, QA report, and passing tests. Raw data stays out of git (license) — hosted on a shared team Google Drive.
+- **2026-07-17 — Framework = PyTorch:** team unified on PyTorch (the whole stack was already PyTorch; Varsha porting her Keras baseline over) to avoid a split model/dataloader stack.
+- **2026-07-18 — Sprint-2 data cleaning done (Rolando + Aparna):** 1,614 → 1,559 rows (dropped unknown skin type + perceptual duplicates); class imbalance via **weighted loss** (`class_weights.json`, not oversampling); test set re-frozen with ≤1pt drift; erythema-safe train-only augmentation. See §2.
+- **2026-07-18 — Fairness reporting = skin-tone bands:** report I-II / III-IV / V-VI as primary (per-type shown with sample sizes) because type-VI coverage is too thin for per-type metrics. See §8.
+- **2026-07-18 — Faces (⏳ pending Iva's sign-off):** QA found ~81% of images have no *detectable* face (Fitzpatrick17k spans all body sites). Direction: **do not hard-filter** to faces (would shrink to ~293 images and drop valid facial close-ups the detector misses); instead train on the full cleaned set, tag the face flag, and report the body-site-vs-face mismatch as a **limitation**. Iva (ML lead) to confirm.

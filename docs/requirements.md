@@ -35,7 +35,9 @@ any change is recorded here with a note.
 
 Skin-tone-stratified evaluation is a core requirement, not an afterthought. If
 the gap exceeds target, the report states it plainly and discusses causes
-(data skew, sample sizes) rather than hiding it.
+(data skew, sample sizes) rather than hiding it. **Measured across bands
+(I-II / III-IV / V-VI)** — per-type test coverage is too thin (3 type-VI images)
+for meaningful per-type metrics; see model-card.md and report §8.
 
 ## 4. Explainability target
 
@@ -49,7 +51,7 @@ the gap exceeds target, the report states it plainly and discusses causes
 | # | Requirement | Target |
 |---|---|---|
 | N1 | Reproducibility | Fixed seeds; training re-runnable from the repo; test set frozen before modelling |
-| N2 | Framework | Python + Keras / PyTorch / TensorFlow |
+| N2 | Framework | Python + **PyTorch** (chosen 2026-07-17 to unify the stack; Keras/TensorFlow also permitted by the instructions) |
 | N3 | Notebook deliverable | Jupyter notebook (code + descriptions + end-of-notebook summary report incl. each member's contribution) **and** a PDF export |
 | N4 | Report contents | Dataset link + EDA plots, preprocessing, model (pretrained + fine-tune), training/validation curves, prediction, evaluation, interpretation, hardware/memory used, next steps, lessons learned |
 | N5 | Privacy | No user images stored; no PII/patient-identifying data in repo or demo |

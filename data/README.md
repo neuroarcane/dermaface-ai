@@ -10,7 +10,15 @@
 
 ## Get the data
 
-See [../docs/data-strategy.md](../docs/data-strategy.md) for sources, licensing, and the processing pipeline. Owner: #3 Data Engineer.
+> ⚠️ **The images / CSVs / manifest / splits are NOT in this repo** (dataset licenses
+> forbid public hosting, and `data/` is gitignored). The raw + processed data lives in the
+> team's **shared Google Drive** (restricted to team emails). **Ask a maintainer (Aparna or
+> Rolando) for access** — the link is kept in the team chat, not here.
+
+- **[raw-data-sources.md](raw-data-sources.md)** — Hessam's full reference on every candidate source (contents, access/download location, license terms, canonical folder names, required provenance fields).
+- **[../docs/data-strategy.md](../docs/data-strategy.md)** — sources, licensing, and the processing pipeline.
+
+Owner: Aparna + Rolando.
 
 ## `manifest.csv` schema (target)
 
