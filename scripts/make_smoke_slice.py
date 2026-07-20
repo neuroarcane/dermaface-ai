@@ -43,8 +43,20 @@ CONCEPTS = ["Erythema", "Papule", "Pustule", "Plaque", "Scale", "Nodule"]
 
 
 def _img(path: Path, color: tuple[int, int, int], size: int = 64) -> None:
+    """Write a small image with a deterministic per-file speckle pattern.
+
+    The speckle matters: flat solid-colour images all produce the *same*
+    perceptual hash, which would make the QA dedup step flag every image as a
+    duplicate. The pattern is seeded by the file path so runs stay reproducible.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
-    Image.new("RGB", (size, size), color).save(path)
+    img = Image.new("RGB", (size, size), color)
+    px = img.load()
+    rng = random.Random(path.name)
+    for y in range(0, size, 4):
+        for x in range(0, size, 4):
+            px[x, y] = (rng.randint(0, 255), rng.randint(0, 255), rng.randint(0, 255))
+    img.save(path)
 
 
 def _color(rng: random.Random) -> tuple[int, int, int]:

@@ -19,7 +19,7 @@ import csv
 from pathlib import Path
 from typing import Any, Callable
 
-from dermaface.config import CLASS_NAMES, SPLIT_NAMES, Config, load_config
+from dermaface.config import CLASS_NAMES, SPLIT_NAMES, Config, load_config, skin_tone_band
 from dermaface.data.preprocessing import build_transforms
 
 LABEL_TO_IDX = {name: i for i, name in enumerate(CLASS_NAMES)}
@@ -96,6 +96,8 @@ class DermaFaceDataset:
                         "label": label,
                         "label_idx": LABEL_TO_IDX[label],
                         "skin_type": r.get("skin_type", "unknown"),
+                        # coarse band for fairness reporting (see config.skin_tone_band)
+                        "skin_tone_band": skin_tone_band(r.get("skin_type", "unknown")),
                         "severity": r.get("severity", "n/a"),
                         "source": r.get("source", ""),
                     }
@@ -138,14 +140,21 @@ def build_dataloaders(
     *,
     manifest_path: Path | None = None,
     skip_missing: bool = False,
-    balance_train: bool = True,
+    balance_train: bool = False,
 ) -> dict[str, Any]:
-    """Return ``{"train": ..., "val": ..., "test": ...}`` DataLoaders.
+    """Return ``{"train": ..., "eval": ..., "test": ..., "demo": ...}`` DataLoaders.
 
     Constructs a ``DermaFaceDataset`` per split and wraps each in a
     ``torch.utils.data.DataLoader`` with ``cfg.batch_size`` / ``cfg.num_workers``.
-    The train loader uses a ``WeightedRandomSampler`` (inverse class frequency)
-    so rare classes like rosacea are not swamped — see module docstring.
+
+    Class imbalance (Sprint-2 decision): handled by a **class-weighted loss**, not
+    by resampling — see ``dermaface.data.weights.class_weights()``. Hence
+    ``balance_train`` defaults to **False**.
+
+    Setting ``balance_train=True`` enables a ``WeightedRandomSampler`` (inverse
+    class frequency) instead. Use one or the other, never both: combining the
+    sampler with weighted-loss training double-corrects the imbalance and makes
+    the model over-predict rare classes.
 
     Raises:
         RuntimeError: if torch is not installed.
