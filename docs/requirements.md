@@ -35,7 +35,9 @@ any change is recorded here with a note.
 
 Skin-tone-stratified evaluation is a core requirement, not an afterthought. If
 the gap exceeds target, the report states it plainly and discusses causes
-(data skew, sample sizes) rather than hiding it.
+(data skew, sample sizes) rather than hiding it. **Measured across bands
+(I-II / III-IV / V-VI)** — per-type test coverage is too thin (3 type-VI images)
+for meaningful per-type metrics; see model-card.md and report §8.
 
 ## 4. Explainability target
 
