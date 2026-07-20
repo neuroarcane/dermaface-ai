@@ -7,7 +7,7 @@
 - **Owner:** #2 Chief Scientist
 - **Date:**
 - **Architecture / backbone:**
-- **Task:** Multi-class condition classification (acne / rosacea / redness / clear) + coarse severity band
+- **Task:** Multi-class condition classification (acne / rosacea / redness / clear). **Severity de-scoped for v1** (too few labelled examples — 6 "severe" / 29 "mild"; see severity-decision.md); concept-derived proxy documented as future work.
 - **Explainability:** Grad-CAM
 
 ## Intended use

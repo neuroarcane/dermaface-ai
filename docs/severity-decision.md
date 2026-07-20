@@ -22,14 +22,22 @@ Relates to issue #1. See also [requirements.md](requirements.md), [data-strategy
 
 **Where it lives:** `cfg.backbone = "resnet50"` in `src/dermaface/config.py`.
 
-## 2. Severity decision — concept-derived proxy
+## 2. Severity decision — DE-SCOPED for v1 (condition-only)
 
-**The problem:** our datasets label the *condition* (acne/rosacea/redness) but **not**
-severity. So severity must be *derived*.
+> **v1 decision (2026-07-21):** severity is **de-scoped** — v1 ships **condition-only**
+> (acne / rosacea / redness / clear). The concept-derived proxy below stays documented as
+> **designed future work**. *Provisional call by Ali (coordinator); Iva informed — reversible.*
 
-**Decision:** **Option 1 — concept-derived proxy** (Iva). Use **SKINCON's** clinical
-concept annotations (inflammatory signs such as erythema, papules, pustules) to bucket
-each image into **mild / moderate / severe**. Cheap and defensible, but approximate.
+**Why de-scoped (data-driven):** the cleaned manifest has severity labels for only ~16% of
+images (263 / 1,614), and they are **heavily skewed** — **6 "severe"** and **29 "mild"**
+examples in total, before any train/eval/test split. A 3-way severity classifier cannot be
+trained reliably from 6 severe images, so a severity output would be misleading. Our
+requirements (F3) explicitly permit a documented de-scope.
+
+**The design (future work): concept-derived proxy.** Use **SKINCON's** clinical concept
+annotations (erythema, papules, pustules) to bucket each image into **mild / moderate /
+severe**. Cheap and defensible, but approximate — needs the SKINCON annotation layer joined
+and enough per-band samples, neither of which v1 has.
 
 **Alternatives considered** (from [data-strategy.md](data-strategy.md)):
 - Rule-based lesion counting — more faithful, much more work.
@@ -68,5 +76,5 @@ Aparna applies it to the manifest during data processing (`severity` column).
 
 ## 4. Definition of done (issue #1)
 - [x] Backbone locked (ResNet50) — documented above.
-- [x] Severity method decided (concept-derived proxy) — documented above.
-- [~] `severity_map.csv` produced as a **draft**; final thresholds pending Iva's validation on SKINCON.
+- [x] Severity decision made — **de-scoped for v1** (condition-only); concept-derived proxy documented as future work.
+- [x] `severity_map.csv` retained as a draft/design artifact (not applied in v1).

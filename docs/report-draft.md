@@ -17,7 +17,7 @@ Write each section to the team's depth standard — see [report-guide.md](report
 
 DermaFace AI is an **educational skin-condition screening prototype**. A user uploads a
 face photo and receives: (1) a predicted condition — **acne, rosacea, redness, or clear**;
-(2) a coarse **severity** estimate (mild / moderate / severe); (3) a **Grad-CAM** overlay
+(2) *[v1: severity **de-scoped** — condition-only, see §3]*; (3) a **Grad-CAM** overlay
 marking the regions that drove the prediction; and (4) confidence, limitations, and a
 "see a professional" prompt.
 
@@ -105,9 +105,11 @@ which is the whole signal for redness/rosacea. A test fails if anyone raises the
     Grad-CAM localization, and our datasets have no lesion bounding boxes; YOLO would also make
     Grad-CAM redundant. (Good "alternatives considered" material for the report.)
 
-**Severity method: concept-derived proxy** (decision: Iva) — use SKINCON concept annotations
-(erythema/papule/pustule intensity) to bucket into mild/moderate/severe. Cheap and defensible,
-but approximate; a `severity_map.csv` will document the mapping. ⬜ *severity_map.csv pending.*
+**Severity: DE-SCOPED for v1 (condition-only).** Severity labels exist for only ~16% of images
+and are heavily skewed (**6 "severe" / 29 "mild"** total), too sparse to train a reliable
+severity classifier. v1 ships condition-only; the **concept-derived proxy** (SKINCON concepts →
+mild/moderate/severe) is documented as **future work** in [severity-decision.md](severity-decision.md).
+*Good "alternatives + honest limitation" material for the report.*
 
 *Depth to add later:* freezing schedule, why pretrained over from-scratch, head design.
 
@@ -220,3 +222,4 @@ Process lessons so far:
 - **2026-07-18 — Sprint-2 data cleaning done (Rolando + Aparna):** 1,614 → 1,559 rows (dropped unknown skin type + perceptual duplicates); class imbalance via **weighted loss** (`class_weights.json`, not oversampling); test set re-frozen with ≤1pt drift; erythema-safe train-only augmentation. See §2.
 - **2026-07-18 — Fairness reporting = skin-tone bands:** report I-II / III-IV / V-VI as primary (per-type shown with sample sizes) because type-VI coverage is too thin for per-type metrics. See §8.
 - **2026-07-18 — Faces (⏳ pending Iva's sign-off):** QA found ~81% of images have no *detectable* face (Fitzpatrick17k spans all body sites). Direction: **do not hard-filter** to faces (would shrink to ~293 images and drop valid facial close-ups the detector misses); instead train on the full cleaned set, tag the face flag, and report the body-site-vs-face mismatch as a **limitation**. Iva (ML lead) to confirm.
+- **2026-07-21 — Severity de-scoped for v1:** the cleaned data has only **6 "severe" / 29 "mild"** labels (~16% of images labelled at all), too sparse to train a reliable severity classifier. v1 ships **condition-only**; concept-derived proxy documented as future work. App shows "Severity: Not assessed." Provisional call by Ali; Iva informed (reversible). Closes the severity part of #1 / requirement F3.

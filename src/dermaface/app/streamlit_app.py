@@ -146,11 +146,11 @@ def main() -> None:
     # In placeholder mode the numbers aren't real — show em-dashes instead of a
     # misleading "clear / 0%" so nobody mistakes it for an actual prediction.
     most_likely = "—" if result.placeholder else result.condition
-    severity = "—" if result.placeholder else result.severity
     confidence = "—" if result.placeholder else f"{result.confidence:.0%}"
     c1, c2, c3 = st.columns(3)
     c1.metric("Most likely", most_likely, help="Estimated — not a diagnosis")
-    c2.metric("Severity band", severity)
+    # Severity is de-scoped for v1 (too few labelled examples to assess reliably).
+    c2.metric("Severity", "Not assessed", help="Out of scope for v1 — see docs/severity-decision.md")
     c3.metric("Confidence", confidence)
 
     # Low-confidence state: warn when a *real* prediction is below threshold.
