@@ -15,7 +15,7 @@ any change is recorded here with a note.
 |---|---|---|---|---|
 | F1 | Classify condition | Predicts one of acne / rosacea / redness / clear from a face photo | App demo + test-set metrics | 🟡 |
 | F2 | Localize affected regions | Grad-CAM overlay accompanies every prediction | Qualitative review of overlays | ✅ |
-| F3 | Severity estimate | Coarse band (mild / moderate / severe) **or** a documented decision to de-scope | Iva's Week-1 methodology decision, with Temirlan supporting evaluation evidence | ⬜ |
+| F3 | Severity estimate | Coarse band (mild / moderate / severe) **or** a documented decision to de-scope | **De-scoped for v1** — only 6 "severe" / 29 "mild" labels exist, too sparse to train reliably; condition-only ships, proxy documented as future work (see severity-decision.md) | ✅ (de-scoped) |
 | F4 | Screening/education framing | Disclaimer shown before and alongside every result; no diagnostic language | UI review vs. ethics checklist | ✅ |
 
 ## 2. Performance targets (frozen test set)
