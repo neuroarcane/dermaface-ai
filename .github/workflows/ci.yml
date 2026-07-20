@@ -17,7 +17,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install tooling + test deps
-        run: pip install ruff pytest numpy scikit-learn
+        run: pip install ruff pytest numpy scikit-learn Pillow imagehash
 
       - name: Lint (ruff)
         run: ruff check src tests
