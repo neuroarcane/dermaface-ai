@@ -1,0 +1,244 @@
+source,raw_label,mapped_class,action,n_rows
+fitzpatrick17k,acne vulgaris,acne,kept,335
+fitzpatrick17k,erythema multiforme,redness,kept,236
+fitzpatrick17k,acne,acne,kept,183
+fitzpatrick17k,rosacea,rosacea,kept,102
+fitzpatrick17k,erythema annulare centrifigum,redness,kept,88
+fitzpatrick17k,erythema nodosum,redness,kept,81
+fitzpatrick17k,perioral dermatitis,rosacea,kept,61
+fitzpatrick17k,erythema elevatum diutinum,redness,kept,55
+fitzpatrick17k,psoriasis,,dropped,653
+fitzpatrick17k,squamous cell carcinoma,,dropped,581
+fitzpatrick17k,lichen planus,,dropped,491
+fitzpatrick17k,basal cell carcinoma,,dropped,468
+fitzpatrick17k,allergic contact dermatitis,,dropped,430
+fitzpatrick17k,lupus erythematosus,,dropped,410
+fitzpatrick17k,neutrophilic dermatoses,,dropped,361
+fitzpatrick17k,sarcoidosis,,dropped,349
+fitzpatrick17k,photodermatoses,,dropped,348
+fitzpatrick17k,folliculitis,,dropped,342
+fitzpatrick17k,scabies,,dropped,339
+fitzpatrick17k,scleroderma,,dropped,309
+fitzpatrick17k,pityriasis rubra pilaris,,dropped,278
+fitzpatrick17k,melanoma,,dropped,261
+fitzpatrick17k,nematode infection,,dropped,260
+fitzpatrick17k,granuloma annulare,,dropped,211
+fitzpatrick17k,eczema,,dropped,204
+fitzpatrick17k,drug eruption,,dropped,200
+fitzpatrick17k,pityriasis rosea,,dropped,193
+fitzpatrick17k,neurofibromatosis,,dropped,189
+fitzpatrick17k,porokeratosis actinic,,dropped,183
+fitzpatrick17k,mycosis fungoides,,dropped,182
+fitzpatrick17k,actinic keratosis,,dropped,175
+fitzpatrick17k,hailey hailey disease,,dropped,174
+fitzpatrick17k,prurigo nodularis,,dropped,170
+fitzpatrick17k,vitiligo,,dropped,166
+fitzpatrick17k,kaposi sarcoma,,dropped,156
+fitzpatrick17k,keloid,,dropped,156
+fitzpatrick17k,dariers disease,,dropped,153
+fitzpatrick17k,tungiasis,,dropped,152
+fitzpatrick17k,pediculosis lids,,dropped,151
+fitzpatrick17k,dermatomyositis,,dropped,151
+fitzpatrick17k,urticaria,,dropped,151
+fitzpatrick17k,papilomatosis confluentes and reticulate,,dropped,150
+fitzpatrick17k,juvenile xanthogranuloma,,dropped,149
+fitzpatrick17k,tuberous sclerosis,,dropped,141
+fitzpatrick17k,lyme disease,,dropped,129
+fitzpatrick17k,syringoma,,dropped,127
+fitzpatrick17k,porphyria,,dropped,127
+fitzpatrick17k,ehlers danlos syndrome,,dropped,127
+fitzpatrick17k,seborrheic dermatitis,,dropped,126
+fitzpatrick17k,telangiectases,,dropped,126
+fitzpatrick17k,fixed eruptions,,dropped,125
+fitzpatrick17k,necrobiosis lipoidica,,dropped,123
+fitzpatrick17k,superficial spreading melanoma ssm,,dropped,118
+fitzpatrick17k,stevens johnson syndrome,,dropped,113
+fitzpatrick17k,pyogenic granuloma,,dropped,113
+fitzpatrick17k,urticaria pigmentosa,,dropped,112
+fitzpatrick17k,milia,,dropped,112
+fitzpatrick17k,lupus subacute,,dropped,111
+fitzpatrick17k,malignant melanoma,,dropped,111
+fitzpatrick17k,scleromyxedema,,dropped,108
+fitzpatrick17k,cheilitis,,dropped,106
+fitzpatrick17k,incontinentia pigmenti,,dropped,102
+fitzpatrick17k,lymphangioma,,dropped,100
+fitzpatrick17k,fordyce spots,,dropped,100
+fitzpatrick17k,lichen simplex,,dropped,97
+fitzpatrick17k,nevus sebaceous of jadassohn,,dropped,95
+fitzpatrick17k,pilar cyst,,dropped,93
+fitzpatrick17k,acrodermatitis enteropathica,,dropped,92
+fitzpatrick17k,mucinosis,,dropped,92
+fitzpatrick17k,acanthosis nigricans,,dropped,92
+fitzpatrick17k,epidermal nevus,,dropped,91
+fitzpatrick17k,rhinophyma,,dropped,91
+fitzpatrick17k,hidradenitis,,dropped,90
+fitzpatrick17k,nevocytic nevus,,dropped,86
+fitzpatrick17k,dyshidrotic eczema,,dropped,83
+fitzpatrick17k,lentigo maligna,,dropped,83
+fitzpatrick17k,halo nevus,,dropped,82
+fitzpatrick17k,xeroderma pigmentosum,,dropped,81
+fitzpatrick17k,calcinosis cutis,,dropped,80
+fitzpatrick17k,dermatofibroma,,dropped,79
+fitzpatrick17k,mucous cyst,,dropped,79
+fitzpatrick17k,porokeratosis of mibelli,,dropped,78
+fitzpatrick17k,keratosis pilaris,,dropped,78
+fitzpatrick17k,lichen amyloidosis,,dropped,77
+fitzpatrick17k,granuloma pyogenic,,dropped,75
+fitzpatrick17k,pityriasis lichenoides chronica,,dropped,73
+fitzpatrick17k,neurotic excoriations,,dropped,73
+fitzpatrick17k,naevus comedonicus,,dropped,73
+fitzpatrick17k,tick bite,,dropped,73
+fitzpatrick17k,aplasia cutis,,dropped,72
+fitzpatrick17k,drug induced pigmentary changes,,dropped,71
+fitzpatrick17k,epidermolysis bullosa,,dropped,70
+fitzpatrick17k,stasis edema,,dropped,69
+fitzpatrick17k,neurodermatitis,,dropped,69
+fitzpatrick17k,seborrheic keratosis,,dropped,69
+fitzpatrick17k,congenital nevus,,dropped,68
+fitzpatrick17k,striae,,dropped,67
+fitzpatrick17k,acquired autoimmune bullous diseaseherpes gestationis,,dropped,67
+fitzpatrick17k,myiasis,,dropped,67
+fitzpatrick17k,sun damaged skin,,dropped,66
+fitzpatrick17k,solid cystic basal cell carcinoma,,dropped,66
+fitzpatrick17k,factitial dermatitis,,dropped,66
+fitzpatrick17k,ichthyosis vulgaris,,dropped,65
+fitzpatrick17k,behcets disease,,dropped,63
+fitzpatrick17k,becker nevus,,dropped,63
+fitzpatrick17k,basal cell carcinoma morpheiform,,dropped,62
+fitzpatrick17k,livedo reticularis,,dropped,60
+fitzpatrick17k,disseminated actinic porokeratosis,,dropped,60
+fitzpatrick17k,langerhans cell histiocytosis,,dropped,60
+fitzpatrick17k,paronychia,,dropped,59
+fitzpatrick17k,port wine stain,,dropped,59
+fitzpatrick17k,pustular psoriasis,,dropped,53
+fitzpatrick17k,pilomatricoma,,dropped,53
+fitzpatrick17k,xanthomas,,dropped,53
+scin,LOOKS_HEALTHY,clear,kept,285
+scin,Acne,acne,kept,61
+scin,ACNE,acne,kept,59
+scin,Rosacea,rosacea,kept,29
+scin,Perioral Dermatitis,rosacea,kept,15
+scin,Erythema multiforme,redness,kept,7
+scin,Erythema ab igne,redness,kept,6
+scin,Erythema nodosum,redness,kept,2
+scin,Erythema gyratum repens,redness,kept,2
+scin,Annular erythema,redness,kept,2
+scin,Erythema migrans,redness,kept,1
+scin,Erythema dyschromicum perstans,redness,kept,1
+scin,Acne keloidalis,acne,kept,1
+scin,TMEP - telangiectasia macularis eruptiva perstans,redness,kept,1
+scin,Acne urticata,acne,kept,1
+scin,RASH,,dropped,2806
+scin,{},,dropped,543
+scin,OTHER_ISSUE_DESCRIPTION,,dropped,406
+scin,Eczema,,dropped,106
+scin,Urticaria,,dropped,58
+scin,Allergic Contact Dermatitis,,dropped,54
+scin,Insect Bite,,dropped,48
+scin,GROWTH_OR_MOLE,,dropped,45
+scin,PIGMENTARY_PROBLEM,,dropped,37
+scin,Tinea,,dropped,31
+scin,Folliculitis,,dropped,23
+scin,Impetigo,,dropped,22
+scin,Psoriasis,,dropped,21
+scin,NAIL_PROBLEM,,dropped,20
+scin,Pigmented purpuric eruption,,dropped,15
+scin,Herpes Zoster,,dropped,14
+scin,Drug Rash,,dropped,12
+scin,HAIR_LOSS,,dropped,11
+scin,"Acute dermatitis, NOS",,dropped,11
+scin,Pityriasis rosea,,dropped,11
+scin,OTHER_HAIR_PROBLEM,,dropped,11
+scin,Lichen planus/lichenoid eruption,,dropped,10
+scin,Tinea Versicolor,,dropped,9
+scin,Irritant Contact Dermatitis,,dropped,9
+scin,Molluscum Contagiosum,,dropped,9
+scin,Herpes Simplex,,dropped,8
+scin,O/E - ecchymoses present,,dropped,8
+scin,Keratosis pilaris,,dropped,8
+scin,Lichen Simplex Chronicus,,dropped,8
+scin,Verruca vulgaris,,dropped,7
+scin,Viral Exanthem,,dropped,7
+scin,"Abrasion, scrape, or scab",,dropped,6
+scin,Photodermatitis,,dropped,6
+scin,"Chronic dermatitis, NOS",,dropped,6
+scin,Granuloma annulare,,dropped,6
+scin,Leukocytoclastic Vasculitis,,dropped,6
+scin,Purpura,,dropped,5
+scin,Abscess,,dropped,5
+scin,Prurigo nodularis,,dropped,4
+scin,Confluent and reticulate papillomatosis,,dropped,4
+scin,Ecthyma,,dropped,4
+scin,Scabies,,dropped,4
+scin,Hypersensitivity,,dropped,4
+scin,Scar Condition,,dropped,4
+scin,Seborrheic Dermatitis,,dropped,4
+scin,Miliaria,,dropped,4
+scin,Intertrigo,,dropped,4
+scin,Lichen nitidus,,dropped,3
+scin,SCC/SCCIS,,dropped,3
+scin,Stasis Dermatitis,,dropped,3
+scin,Livedo reticularis,,dropped,3
+scin,O/E - petechiae on skin,,dropped,3
+scin,Pityriasis lichenoides,,dropped,3
+scin,Xerosis,,dropped,3
+scin,SK/ISK,,dropped,3
+scin,Actinic Keratosis,,dropped,3
+scin,Inflicted skin lesions,,dropped,2
+scin,Onychomycosis,,dropped,2
+scin,Post-Inflammatory hyperpigmentation,,dropped,2
+scin,Cyst,,dropped,2
+scin,Acute and chronic dermatitis,,dropped,2
+scin,Milia,,dropped,2
+scin,Infected eczema,,dropped,2
+scin,Idiopathic guttate hypomelanosis,,dropped,2
+scin,Dermatofibroma,,dropped,2
+scin,Melanocytic Nevus,,dropped,2
+scin,Hemangioma,,dropped,2
+scin,Lichen sclerosus,,dropped,1
+scin,Cutaneous larva migrans,,dropped,1
+scin,Grover's disease,,dropped,1
+scin,Deep fungal infection,,dropped,1
+scin,Burn of skin,,dropped,1
+scin,Skin ulcer,,dropped,1
+scin,Porokeratosis,,dropped,1
+scin,Remove from labeling tool,,dropped,1
+scin,Cheilitis,,dropped,1
+scin,Localized skin infection,,dropped,1
+scin,Lichenified eczematous dermatitis,,dropped,1
+scin,Morphea/Scleroderma,,dropped,1
+scin,Arsenical keratosis,,dropped,1
+scin,Bullous Pemphigoid,,dropped,1
+scin,Basal Cell Carcinoma,,dropped,1
+scin,Knuckle pads,,dropped,1
+scin,Traumatic blister,,dropped,1
+scin,Melasma,,dropped,1
+scin,AKV - Acrokeratosis verruciformis,,dropped,1
+scin,Fungal dermatosis,,dropped,1
+scin,Contact purpura,,dropped,1
+scin,Fungal dermatitis,,dropped,1
+scin,Paronychia,,dropped,1
+scin,Inverse psoriasis,,dropped,1
+scin,Vasculitis of the skin,,dropped,1
+scin,Skin and soft tissue atypical mycobacterial infection,,dropped,1
+scin,Dermatitis herpetiformis,,dropped,1
+scin,On examination - follicular pustules,,dropped,1
+scin,Poikiloderma,,dropped,1
+scin,Phytophotodermatitis,,dropped,1
+scin,Rheumatoid nodule,,dropped,1
+scin,Pityriasis alba,,dropped,1
+scin,Vitiligo,,dropped,1
+scin,Majocchi granuloma,,dropped,1
+scin,Cutaneous sarcoidosis,,dropped,1
+scin,Koebner phenomenon,,dropped,1
+scin,O/E - petechiae present,,dropped,1
+scin,Hand foot and mouth disease,,dropped,1
+scin,Cutaneous lupus,,dropped,1
+scin,Localised cutaneous vasculitis,,dropped,1
+scin,Skin infection,,dropped,1
+scin,Hidradenitis,,dropped,1
+scin,Chilblain,,dropped,1
+scin,Lichen spinulosus,,dropped,1
+scin,Cellulitis,,dropped,1
+scin,Geographic tongue,,dropped,1
+scin,Chicken pox exanthem,,dropped,1

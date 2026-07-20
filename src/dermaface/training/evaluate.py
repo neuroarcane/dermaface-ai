@@ -16,9 +16,9 @@ from dermaface.config import Config, load_config
 
 def parse_args() -> argparse.Namespace:
     cfg = load_config()
-    p = argparse.ArgumentParser(description="Evaluate DermaFace on the test split")
+    p = argparse.ArgumentParser(description="Evaluate DermaFace on a data split")
     p.add_argument("--model-path", type=str, default=str(cfg.model_path))
-    p.add_argument("--split", type=str, default="test", choices=["val", "test"])
+    p.add_argument("--split", type=str, default="test", choices=["eval", "test", "demo"])
     return p.parse_args()
 
 

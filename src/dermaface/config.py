@@ -20,6 +20,12 @@ SEVERITY_BANDS: list[str] = ["mild", "moderate", "severe", "n/a"]
 # Fitzpatrick skin types tracked for fairness analysis.
 FITZPATRICK_TYPES: list[str] = ["I", "II", "III", "IV", "V", "VI"]
 
+# --- Dataset splits ---------------------------------------------------------
+# Four-way split. "eval" is the tuning/validation split; "test" is frozen and
+# never tuned on; "demo" is a tiny curated set reserved for the app demo.
+SPLIT_NAMES: list[str] = ["train", "eval", "test", "demo"]
+DEFAULT_SPLIT_RATIOS: tuple[float, float, float, float] = (0.70, 0.15, 0.10, 0.05)
+
 # --- Paths ------------------------------------------------------------------
 REPO_ROOT: Path = Path(__file__).resolve().parents[2]
 _DEFAULT_DATA_DIR = REPO_ROOT / "data"
@@ -59,6 +65,16 @@ class Config:
     def manifest_path(self) -> Path:
         """CSV manifest of the processed dataset (see data/README.md)."""
         return self.data_dir / "processed" / "manifest.csv"
+
+    @property
+    def label_map_path(self) -> Path:
+        """Crosswalk of raw source condition names -> the four classes."""
+        return self.data_dir / "external" / "label_map.csv"
+
+    @property
+    def qa_report_path(self) -> Path:
+        """Per-image data-quality report (see data/processed/qa/)."""
+        return self.data_dir / "processed" / "qa" / "data_quality_report.csv"
 
 
 def _env_path(var: str, default: Path) -> Path:
