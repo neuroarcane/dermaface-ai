@@ -1,4 +1,9 @@
 # Data & models (never commit images, PII, or weights)
+# License-restricted data handoffs / manifests — must live on the team Drive, NOT here:
+/dermaface-data-handoff/
+/dermaface-manifests/
+/DermaFace_Cleaned_Manifest.docx
+*.REAL.csv
 data/raw/*
 data/processed/*
 data/external/*
