@@ -46,13 +46,20 @@ Interpretation after the frozen-test-set run.
 | redness | _tbd_ | _tbd_ | _tbd_ | _tbd_ |
 | clear | _tbd_ | _tbd_ | _tbd_ | _tbd_ |
 
-### By Fitzpatrick skin type (fairness)
+### By Fitzpatrick skin-tone band (fairness — primary view)
 
-| Skin type | Accuracy | Macro-F1 | Support |
+Reported by **bands**, not per-type: type-VI coverage is too thin for per-type metrics
+(only 3 type-VI images in the test set; zero rosacea-on-VI). Show the per-type I–VI table
+alongside **with sample sizes** so tiny-n groups aren't read as results. See report §8.
+
+| Skin-tone band | Test support | Accuracy | Macro-F1 |
 |---|---|---|---|
-| I–II | _tbd_ | _tbd_ | _tbd_ |
-| III–IV | _tbd_ | _tbd_ | _tbd_ |
-| V–VI | _tbd_ | _tbd_ | _tbd_ |
+| I–II | 81 | _tbd_ | _tbd_ |
+| III–IV | 61 | _tbd_ | _tbd_ |
+| V–VI | 16 | _tbd_ | _tbd_ |
+
+> **Limitation:** type VI = 1.9% of the dataset; darkest-skin metrics are not statistically
+> meaningful. Skew originates in the source datasets, not our (stratified) sampling.
 
 ### Error analysis & failure cases
 

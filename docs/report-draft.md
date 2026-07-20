@@ -67,15 +67,25 @@ plot: class balance, Fitzpatrick skin-tone distribution, and image-quality summa
 *Depth to add later:* why these datasets, their known biases, licensing constraints, what's
 missing, and how class/skin-tone skew is expected to affect results.
 
-## 2. Preprocessing ⬜ (planned)
+## 2. Preprocessing 🟡 (Sprint-2 data work done; Rolando + Aparna)
 
-Planned pipeline (see [data-strategy.md](data-strategy.md)): dedup (perceptual hash),
-drop corrupt/low-quality images, face-presence check, unify labels → {acne, rosacea,
-redness, clear}, stratified train/val/test/demo splits by **class and Fitzpatrick type**,
-frozen test set. Normalization uses ImageNet statistics.
+**Cleaning:** 1,614 → **1,559** rows — dropped 35 with unknown Fitzpatrick type and 21
+perceptual-hash duplicate images. Every surviving row validates (real class + real skin type,
+no unknowns).
 
-*Note:* color augmentation is kept **mild** on purpose — aggressive jitter would destroy the
-erythema/redness signal the model needs.
+**Class imbalance → weighted loss** (not oversampling). With only ~200 rosacea images,
+resampling would show the model the same few images repeatedly; instead, class weights are
+exported to `class_weights.json` (rosacea ≈ 3.1× acne) and applied in the loss. The sampler is
+off by default so we don't double-correct. *Why this over oversampling:* avoids overfitting to
+a handful of rare-class images.
+
+**Splits:** re-frozen from the cleaned rows with **original assignments preserved** (no
+reshuffle) — the frozen test set is the same images minus what cleaning removed; measured drift
+is **≤ 1 point** on every class and skin type, so stratification held. (seed 42)
+
+**Augmentation (train split only):** crop / flip / rotation + mild brightness/contrast.
+**Saturation and hue are locked at 0 on purpose** — jittering them washes out the erythema,
+which is the whole signal for redness/rosacea. A test fails if anyone raises them.
 
 *Depth to add later:* why each step; what didn't help; effect of augmentation choices.
 
@@ -126,10 +136,19 @@ evaluation contract downstream stages use.
 **Results:** ⬜ pending training. Will report accuracy, macro-F1, per-class precision/recall,
 confusion matrix, and the **Target-vs-Actual** table with a one-line interpretation per row.
 
-## 8. Fairness analysis ⬜ (pending)
+## 8. Fairness analysis 🟡 (method decided; results pending)
 
-Metrics stratified by Fitzpatrick skin type; report the macro-F1 gap honestly even if it
-exceeds the ≤ 0.15 target, and discuss likely causes (data skew, small subgroup sizes).
+**Reporting decision:** report fairness across **skin-tone bands (I-II / III-IV / V-VI)** as
+the primary view (test-set n = 81 / 61 / 16), with the per-type I–VI table shown alongside
+**annotated with sample sizes**. *Why bands:* the test set has only **3 Fitzpatrick VI images**
+and **zero rosacea-on-VI**, so a per-type macro-F1 on n=3 is noise, not a measurement — a single
+error moves it ~33 points. Bands mirror the grouping the DDI dataset uses.
+
+**Limitation (state plainly in the report):** type VI is 1.9% of the dataset; per-type metrics
+for the darkest skin are not statistically meaningful and won't be reported as if they were.
+This skew originates in the source datasets (public dermatology collections lean toward lighter
+skin), **not** our sampling (stratified; ≤1pt drift). Full write-up + ready-to-paste paragraph:
+Rolando's `FAIRNESS_LIMITATION.md` (on the team Drive).
 
 ## 9. Explainability — Grad-CAM 🟡 (app done; evidence pending)
 
@@ -170,7 +189,7 @@ Process lessons so far:
 |---|---|
 | Hessam (Product Lead) | Scope, disclaimer/ethics framing, Day-1 setup report, coordination |
 | Iva (ML Research) | Backbone decision (ResNet50), severity method (concept-derived proxy), metrics implementation + tests |
-| Aparna + Rolando (Data) | Data acquisition in progress — SCIN downloaded; Fitzpatrick17k URLs mostly dead (authors emailed); manifest/QA/EDA to follow |
+| Aparna + Rolando (Data) | Data acquisition + Sprint-2 cleaning: harmonized manifest, dedup + skin-type validation (1,614→1,559), weighted-loss imbalance handling, frozen splits (≤1pt drift), erythema-safe augmentation, QA + fairness-coverage findings |
 | Varsha (MLOps) | Baseline **CNN + ResNet models ready**; porting to **PyTorch** (team framework decision); training pending data; benchmarking plan; CI |
 | Temirlan (Eval & Explainability) | Metrics test support, Grad-CAM evidence set, evaluation validation (delayed by an ISP outage, now resolved) |
 | Ali (UI/UX) | Streamlit app (upload/consent/disclaimer/UI states), Grad-CAM overlay display, standups/sprint tracking; #1 decision write-up (`severity-decision.md` + draft `severity_map`) |
@@ -198,3 +217,6 @@ Process lessons so far:
 ### Decisions after Standup 2
 - **2026-07-17 — Data pipeline delivered:** Rolando's PR acquires all 3 datasets (1,614 images via an MD5-matched Kaggle mirror, dodging the dead URLs), with harmonized manifest, label map, stratified frozen splits, QA report, and passing tests. Raw data stays out of git (license) — hosted on a shared team Google Drive.
 - **2026-07-17 — Framework = PyTorch:** team unified on PyTorch (the whole stack was already PyTorch; Varsha porting her Keras baseline over) to avoid a split model/dataloader stack.
+- **2026-07-18 — Sprint-2 data cleaning done (Rolando + Aparna):** 1,614 → 1,559 rows (dropped unknown skin type + perceptual duplicates); class imbalance via **weighted loss** (`class_weights.json`, not oversampling); test set re-frozen with ≤1pt drift; erythema-safe train-only augmentation. See §2.
+- **2026-07-18 — Fairness reporting = skin-tone bands:** report I-II / III-IV / V-VI as primary (per-type shown with sample sizes) because type-VI coverage is too thin for per-type metrics. See §8.
+- **2026-07-18 — Faces (⏳ pending Iva's sign-off):** QA found ~81% of images have no *detectable* face (Fitzpatrick17k spans all body sites). Direction: **do not hard-filter** to faces (would shrink to ~293 images and drop valid facial close-ups the detector misses); instead train on the full cleaned set, tag the face flag, and report the body-site-vs-face mismatch as a **limitation**. Iva (ML lead) to confirm.
