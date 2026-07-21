@@ -100,7 +100,8 @@ which is the whole signal for redness/rosacea. A test fails if anyone raises the
 - **Backbone: ResNet50** (ImageNet-pretrained). *Why:* reliable for transfer learning, strong
   performance/compute balance for 224×224 classification, well-supported. (Decision: Iva.)
 - **Alternatives considered:**
-  - *Train a CNN from scratch* (option 3-1) — kept as the from-scratch baseline for comparison (Varsha).
+  - *Train a CNN from scratch* (option 3-1) — kept as a **from-scratch baseline** for comparison.
+- **Model comparison (Sprint 2):** we train and compare **three** models — a baseline **CNN (6-layer, from scratch)**, **ResNet50** (fine-tuned), and **VGG16** — one per team member (Varsha / Iva / Temirlan), then pick the best on a common metric set. Reporting a from-scratch baseline vs. two pretrained backbones is good "alternatives + why" evidence.
   - *YOLO / object detection* — **rejected**: our task is whole-image *classification* with
     Grad-CAM localization, and our datasets have no lesion bounding boxes; YOLO would also make
     Grad-CAM redundant. (Good "alternatives considered" material for the report.)
@@ -192,8 +193,8 @@ Process lessons so far:
 | Hessam (Product Lead) | Scope, disclaimer/ethics framing, Day-1 setup report, coordination |
 | Iva (ML Research) | Backbone decision (ResNet50), severity method (concept-derived proxy), metrics implementation + tests |
 | Aparna + Rolando (Data) | Data acquisition + Sprint-2 cleaning: harmonized manifest, dedup + skin-type validation (1,614→1,559), weighted-loss imbalance handling, frozen splits (≤1pt drift), erythema-safe augmentation, QA + fairness-coverage findings |
-| Varsha (MLOps) | Baseline **CNN + ResNet models ready**; porting to **PyTorch** (team framework decision); training pending data; benchmarking plan; CI |
-| Temirlan (Eval & Explainability) | Metrics test support, Grad-CAM evidence set, evaluation validation (delayed by an ISP outage, now resolved) |
+| Varsha (MLOps) | Baseline **CNN + ResNet** (PyTorch); leads training + model comparison (assigns models, defines metrics, consolidates); HF Spaces deploy; CI |
+| Temirlan (Eval & Explainability) | Trains one comparison model; metrics test support; Grad-CAM evidence set; evaluation + failure analysis |
 | Ali (UI/UX) | Streamlit app (upload/consent/disclaimer/UI states), Grad-CAM overlay display, standups/sprint tracking; #1 decision write-up (`severity-decision.md` + draft `severity_map`) |
 
 ---
@@ -223,3 +224,9 @@ Process lessons so far:
 - **2026-07-18 — Fairness reporting = skin-tone bands:** report I-II / III-IV / V-VI as primary (per-type shown with sample sizes) because type-VI coverage is too thin for per-type metrics. See §8.
 - **2026-07-18 — Faces (⏳ pending Iva's sign-off):** QA found ~81% of images have no *detectable* face (Fitzpatrick17k spans all body sites). Direction: **do not hard-filter** to faces (would shrink to ~293 images and drop valid facial close-ups the detector misses); instead train on the full cleaned set, tag the face flag, and report the body-site-vs-face mismatch as a **limitation**. Iva (ML lead) to confirm.
 - **2026-07-21 — Severity de-scoped for v1:** the cleaned data has only **6 "severe" / 29 "mild"** labels (~16% of images labelled at all), too sparse to train a reliable severity classifier. v1 ships **condition-only**; concept-derived proxy documented as future work. App shows "Severity: Not assessed." Provisional call by Ali; Iva informed (reversible). Closes the severity part of #1 / requirement F3.
+
+### Sprint 2, Standup 1 — 20 July 2026 (full notes: [standups/2026-07-20-sprint2-standup1.md](standups/2026-07-20-sprint2-standup1.md))
+- **Training kicked off** (Varsha — critical path; full data pipeline now merged). May slip a day (other project first).
+- **3-person pairing dropped** on #20 → each of Varsha / Iva / Temirlan trains one model; **compare baseline CNN vs ResNet50 vs VGG16**, consolidate metrics.
+- **Report:** Claude drafts, Iva + Hessam humanise. **Video** for Moe recorded Friday.
+- Absent: Hessam.
