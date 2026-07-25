@@ -17,7 +17,9 @@ jobs:
           python-version: "3.11"
 
       - name: Install tooling + test deps
-        run: pip install ruff pytest numpy scikit-learn Pillow imagehash
+        # ruff is pinned: an unpinned upgrade broadened the default rule set and
+        # turned CI red on an unrelated commit. Bump deliberately.
+        run: pip install ruff==0.16.0 pytest numpy scikit-learn Pillow imagehash
 
       - name: Lint (ruff)
         run: ruff check src tests

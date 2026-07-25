@@ -72,11 +72,16 @@ def main() -> None:
     st.caption("Screening & education — **not a diagnosis**")
     st.warning(DISCLAIMER)
 
-    if not cfg.model_path.exists():
+    # Use the same resolution logic as predict() so this banner never contradicts
+    # what the app actually serves (predict() finds dermaface_best_<arch>.pt too,
+    # not just cfg.model_path).
+    from dermaface.inference import resolve_checkpoint
+
+    if resolve_checkpoint(cfg) is None:
         st.info(
-            "⚙️ **Placeholder mode** — no trained model found at "
-            f"`{cfg.model_path.name}`. The condition/severity below are not real "
-            "predictions; the Grad-CAM heatmap uses a random-weight model to "
+            "⚙️ **Placeholder mode** — no trained model found under "
+            f"`{cfg.model_path.parent.name}/`. The condition/severity below are not "
+            "real predictions; the Grad-CAM heatmap uses a random-weight model to "
             "demonstrate the interface."
         )
 

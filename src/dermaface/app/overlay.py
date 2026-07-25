@@ -15,25 +15,12 @@ from typing import Any
 import numpy as np
 
 from dermaface.config import Config, load_config
+from dermaface.inference import prepare_image  # re-exported: core owns preprocessing
 
 # Lazily-built random-weight model, reused across calls (cheap to keep around).
 _DEMO_MODEL: Any = None
 
-
-def prepare_image(image: Any, cfg: Config | None = None) -> tuple[np.ndarray, Any]:
-    """Turn a PIL image into (rgb_float HxWx3 in [0,1], input_tensor 1xCxHxW).
-
-    ``rgb_float`` is the resized, un-normalized image used as the overlay base;
-    ``input_tensor`` is normalized for the model.
-    """
-    cfg = cfg or load_config()
-    from dermaface.data.preprocessing import build_transforms
-
-    resized = image.resize((cfg.image_size, cfg.image_size))
-    rgb_float = np.asarray(resized, dtype=np.float32) / 255.0
-
-    tensor = build_transforms(cfg, train=False)(image).unsqueeze(0)
-    return rgb_float, tensor
+__all__ = ["prepare_image", "detect_face", "build_demo_overlay"]
 
 
 def detect_face(image: Any) -> bool:
