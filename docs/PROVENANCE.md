@@ -5,11 +5,13 @@ obtained. **Read before publishing anything derived from this data.** Medical-
 adjacent images are sensitive; licensing here is restrictive.
 
 > **Image data is kept out of git** — images, raw CSVs, `manifest.csv`, splits, and
-> QA reports are never committed (shared via the team Google Drive
-> `DermaFace-Team-Data`), to respect dataset licensing, especially Fitzpatrick17k's
-> non-commercial terms. Two small, non-image records stay versioned in the repo:
-> this provenance doc (in `docs/`) and the label crosswalk
-> (`data/external/label_map.csv`). Neither contains image data or PII.
+> QA reports are never committed. Metadata (the manifests, splits, label map, raw
+> CSVs) is shared via the team Google Drive `DermaFace-Team-Data`. **Fitzpatrick17k
+> images are NOT re-hosted anywhere** — not git, not the Drive — because the access
+> agreement requires research-only use and deletion on completion; each authorized
+> teammate fetches their own copy via the official form. Two small, non-image
+> records stay versioned in the repo: this provenance doc (in `docs/`) and the label
+> crosswalk (`data/external/label_map.csv`). Neither contains image data or PII.
 
 Last verified: **2026-07-17** (Aparna, Data Lead / Rolando, Data QA). Re-verify
 license terms at each source before any external release.
@@ -25,15 +27,15 @@ license terms at each source before any external release.
 | **Dataset license** | **Non-commercial / research use only** (derivatives typically CC BY-NC-SA 4.0). These terms govern the **images** regardless of where we obtain the files. |
 | **Metadata** | `fitzpatrick17k.csv` (from the official repo) — columns `md5hash, fitzpatrick_scale, fitzpatrick_centaur, label, nine_partition_label, three_partition_label, qc, url, url_alphanum`. The `md5hash` column is the **MD5 of each image's bytes**. |
 
-**Actual image source — Kaggle mirror (what we used):**
+**Image source — official access form (what we used):**
 
 | | |
 |---|---|
-| **Mirror** | `nazmusresan/fitzpatrick17k` on Kaggle — https://www.kaggle.com/datasets/nazmusresan/fitzpatrick17k |
-| **Mirror license** | **CC0-1.0** (public domain dedication *by the uploader*). ⚠️ The mirror's CC0 tag does **not** override the underlying dataset's non-commercial terms — we still treat the **images as non-commercial / research-only** and do not redistribute them. |
-| **Why a mirror** | The official dataset ships only external clinical-atlas URLs (dermaamin.com, atlasdermatologico.com.br); many are dead and downloading is slow/unreliable. |
-| **How we obtained it (MD5-matching)** | We download the mirror via the `kaggle` CLI, then match its images to our manifest **by content MD5**: for every mirror image we take its filename stem (if already an md5) or hash its bytes, and keep it only if that hash is in `fitzpatrick17k.csv`'s `md5hash` set. This is naming-agnostic (mirror file names don't matter) and immune to dead links. Implemented in `src/dermaface/data/download.py` (`import_fitzpatrick_images`, `--from-kaggle`). Result: **1,141** manifest images, full coverage. A local mirror folder works too via `--from-dir` (same MD5 match). The direct-URL fetch remains available as a fallback. |
-| **Restrictions** | ❗ Non-commercial only; do not redistribute the images; keep them out of git. |
+| **Source** | Obtained the full image set (16,577 files, each named by its `md5hash`) via the **official Fitzpatrick17k access form**, which grants a link to the complete image archive. |
+| **Terms accepted (from the form)** | **Scientific / medical research use only**, and **the data will be deleted from all devices once the research is complete.** These obligations are binding and stricter than the base non-commercial license. |
+| **How we use it (MD5-matching)** | Images are matched to the manifest **by content MD5** — each file's name equals the MD5 of its bytes, which is exactly the `md5hash` column in `fitzpatrick17k.csv`. Verified: content MD5 == filename for the set, and the 16,577 images map 1:1 to the 16,577 CSV rows (0 missing, 0 extra). Point the pipeline at the folder with `--from-dir <path>` — `src/dermaface/data/download.py::import_fitzpatrick_images` copies exactly the manifest's images into `data/raw/fitzpatrick17k/images/`. |
+| **Fallback** | `nazmusresan/fitzpatrick17k` on Kaggle (CC0-tagged re-host) via `--from-kaggle`, for anyone awaiting form approval. ⚠️ The mirror's CC0 tag does **not** override the underlying non-commercial terms; it also missed ~231 of the images we needed (~85% coverage), so the official form is preferred. The direct clinical-atlas URLs (`url` column) are a further fallback but many are dead. |
+| **Restrictions** | ❗ Research use only; do **not** redistribute the images; keep them out of git and off the shared Drive; **delete when the project is complete** (see checklist). |
 
 ## 2. SKINCON
 
@@ -77,8 +79,11 @@ normalized to Roman numerals I–VI (or `unknown`) so splits can stratify by ski
       — shared via the team Google Drive (`DermaFace-Team-Data`).
 - [x] Non-image records versioned in repo: `docs/PROVENANCE.md` +
       `data/external/label_map.csv` (taxonomy crosswalk, no image data/PII).
-- [x] Kaggle mirror documented as the actual Fitzpatrick image source, with the
-      caveat that non-commercial terms still govern the images.
+- [x] Fitzpatrick17k images obtained via the **official access form** (research-use
+      agreement), not re-hosted to git or the team Drive. Kaggle mirror kept only as
+      an approval-pending fallback.
+- [ ] ⏳ **Delete Fitzpatrick17k images from all devices when the project is
+      complete** — required by the access agreement. (Owner: Rolando.)
 - [ ] If publishing derived results: re-confirm Fitzpatrick17k non-commercial terms
       and add SCIN CC-BY attribution.
 - [ ] DDI credentialized access requested before using DDI images (currently unused).
