@@ -125,10 +125,16 @@ Will track **training loss & accuracy** and analyze train/validation via history
 include loss/accuracy curves and note over/underfitting signs and interventions.
 *Blocked on:* the processed manifest (Aparna + Rolando) → training loop (Varsha).
 
-## 6. Prediction ⬜ (pending)
+## 6. Prediction 🟡 (real inference wired; awaiting the winning model)
 
-`model.predict` on held-out images; the Streamlit app already performs single-image inference
-(placeholder mode until a checkpoint exists).
+`dermaface.inference.predict` runs the full single-image path — preprocess (eval transforms,
+matching training) → forward pass → softmax → `Prediction` + Grad-CAM overlay — and the Streamlit
+app consumes it (PR #43, Ali). `load_model` resolves a checkpoint and rebuilds the matching
+architecture (from-scratch `cnn` or a torchvision backbone), so whichever model the comparison
+picks is a one-file drop into `models/`. When no checkpoint is present the app falls back to a
+clearly-labelled **placeholder** result — real output is never presented as a prediction without a
+model. Currently loads the Basic CNN baseline; its low confidence trips the app's low-confidence
+warning, which is the honest behaviour for a near-chance model.
 
 ## 7. Evaluation 🟡 (metrics implemented; results pending)
 
@@ -172,10 +178,13 @@ This skew originates in the source datasets (public dermatology collections lean
 skin), **not** our sampling (stratified; ≤1pt drift). Full write-up + ready-to-paste paragraph:
 Rolando's `FAIRNESS_LIMITATION.md` (on the team Drive).
 
-## 9. Explainability — Grad-CAM 🟡 (app done; evidence pending)
+## 9. Explainability — Grad-CAM 🟡 (wired to the real model; evidence pending)
 
-**Done (Ali + Varsha):** Grad-CAM overlay renders in the Streamlit app for every prediction
-(currently on a random-weight model in placeholder mode, clearly labelled as illustrative).
+**Done (Ali + Varsha):** Grad-CAM overlay renders in the Streamlit app for every prediction,
+now computed on the **trained model's own weights** (PR #43) rather than the earlier random-weight
+placeholder. The heatmap targets the model's last conv layer (`BasicCNN.gradcam_target_layer`, or
+`layer4[-1]` for a ResNet backbone) and is best-effort — a heatmap failure never blocks the
+prediction. Before a checkpoint exists the app still shows a clearly-labelled illustrative overlay.
 
 **Pending (Temirlan):** collect the evidence set for the report — correct examples, failure
 examples, and misleading heatmaps. IoU/localization scoring only if valid masks/boxes/proxy
