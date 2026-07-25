@@ -136,8 +136,27 @@ include loss/accuracy curves and note over/underfitting signs and interventions.
 `fairness_by_skin_type`, and `confusion` (sklearn), with 5 passing unit tests. This is the
 evaluation contract downstream stages use.
 
-**Results:** ⬜ pending training. Will report accuracy, macro-F1, per-class precision/recall,
-confusion matrix, and the **Target-vs-Actual** table with a one-line interpretation per row.
+**Results — Basic CNN baseline (Ali):** ✅ first real numbers in. Full auto-generated report:
+[eval_reports/cnn_eval_report.docx](eval_reports/cnn_eval_report.docx). Frozen test set:
+**accuracy 0.35, macro-F1 0.35, macro-precision 0.33, macro-recall 0.44** (checkpoint
+`dermaface_best_cnn.pt`, best val macro-F1 0.386 @ epoch 20). Per-class recall: acne 0.06,
+rosacea 0.45, redness 0.42, clear 0.84. Target-vs-Actual: **P1–P3 not met**, **Fa1 met**
+(band gap 0.064 ≤ 0.15).
+
+*Error analysis (CNN):* the model sits at roughly chance and does **not** beat the majority-class
+baseline (0.35 vs 0.40). The confusion matrix explains why: it reliably recognises **clear** skin
+(recall 0.84) but **collapses on acne** (recall 0.06 — only 4 of 63 acne images correct),
+scattering acne predictions across redness (28), clear (16) and rosacea (15); rosacea and redness
+are likewise confused with each other. In effect the network learned a "clear vs. not-clear"
+boundary but cannot separate the three erythema conditions — unsurprising, since acne, rosacea and
+redness all present as red, inflamed skin, and a 6-layer network trained from scratch on ~1,000
+images lacks the capacity and data to pick up the finer cues (papules, telangiectasia, diffuse
+flushing) that distinguish them. This is the **intended role** of the Basic CNN: a weak
+from-scratch baseline for the pretrained models (ResNet50, VGG16) to beat. If they don't improve
+materially on the erythema classes, the bottleneck is data, not architecture.
+
+**Comparison models (ResNet50 — Iva, VGG16 — Temirlan):** ⬜ pending; same eval contract, numbers
+consolidated into one table for the final report.
 
 ## 8. Fairness analysis 🟡 (method decided; results pending)
 
