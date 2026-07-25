@@ -55,6 +55,11 @@ def get_gradcam_target_layer(model: Any, cfg: Config | None = None) -> Any:
 
     Kept next to the model so it stays in sync with backbone changes.
     """
+    # A model may declare its own target layer (e.g. the from-scratch BasicCNN,
+    # which isn't a torchvision backbone). Prefer that when present.
+    own = getattr(model, "gradcam_target_layer", None)
+    if own is not None:
+        return own
     cfg = cfg or load_config()
     if cfg.backbone.startswith("resnet"):
         return model.layer4[-1]
