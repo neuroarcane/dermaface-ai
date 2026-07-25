@@ -101,7 +101,7 @@ which is the whole signal for redness/rosacea. A test fails if anyone raises the
   performance/compute balance for 224×224 classification, well-supported. (Decision: Iva.)
 - **Alternatives considered:**
   - *Train a CNN from scratch* (option 3-1) — kept as a **from-scratch baseline** for comparison.
-- **Model comparison (Sprint 2):** we train and compare **three** models — a baseline **CNN (6-layer, from scratch)**, **ResNet50** (fine-tuned), and **VGG16** — one per team member (Varsha / Iva / Temirlan), then pick the best on a common metric set. Reporting a from-scratch baseline vs. two pretrained backbones is good "alternatives + why" evidence.
+- **Model comparison (Sprint 2):** we train and compare **three** models, one per team member — a baseline **CNN (6-layer, from scratch; Ali)** plus one fine-tuned pretrained model each from **Varsha** and **Iva** — then pick the best on a common metric set. *(Varsha's and Iva's specific backbones TBD — to be filled in from their runs; a from-scratch baseline vs. two pretrained backbones is good "alternatives + why" evidence.)*
   - *YOLO / object detection* — **rejected**: our task is whole-image *classification* with
     Grad-CAM localization, and our datasets have no lesion bounding boxes; YOLO would also make
     Grad-CAM redundant. (Good "alternatives considered" material for the report.)
@@ -161,8 +161,9 @@ flushing) that distinguish them. This is the **intended role** of the Basic CNN:
 from-scratch baseline for the pretrained models (ResNet50, VGG16) to beat. If they don't improve
 materially on the erythema classes, the bottleneck is data, not architecture.
 
-**Comparison models (ResNet50 — Iva, VGG16 — Temirlan):** ⬜ pending; same eval contract, numbers
-consolidated into one table for the final report.
+**Comparison models (Varsha + Iva — backbones TBD):** 🟡 Varsha's model is trained; Iva's is in
+progress. Same eval contract; the three sets of numbers get consolidated into one table for the
+final report.
 
 ## 8. Fairness analysis 🟡 (method decided; results pending)
 
