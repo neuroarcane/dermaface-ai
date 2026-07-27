@@ -64,15 +64,17 @@ def get_gradcam_target_layer(model: Any, cfg: Config | None = None) -> Any:
     own = getattr(model, "gradcam_target_layer", None)
     if own is not None:
         return own
-    cfg = cfg or load_config()
-    if cfg.backbone.startswith("resnet"):
-        return model.layer4[-1]
-    if cfg.backbone == "efficientnet_b0":
-        return model.features[-1]
-    if cfg.backbone == "vgg16":
-        # vgg16's feature stack ends in a MaxPool; hook the last conv before it.
-        from torch import nn
 
-        convs = [m for m in model.features if isinstance(m, nn.Conv2d)]
-        return convs[-1]
-    raise ValueError(f"no target layer configured for {cfg.backbone!r}")
+    # Infer the target layer from the MODEL'S OWN structure, not cfg.backbone —
+    # the loaded checkpoint's architecture can differ from the config default
+    # (e.g. the app loads a vgg16 checkpoint while cfg.backbone is still resnet50),
+    # and keying off cfg.backbone would pick the wrong layer and crash.
+    from torch import nn
+
+    if hasattr(model, "layer4"):  # ResNet family
+        return model.layer4[-1]
+    if hasattr(model, "features"):  # VGG / EfficientNet / most CNN backbones
+        convs = [m for m in model.features.modules() if isinstance(m, nn.Conv2d)]
+        if convs:
+            return convs[-1]
+    raise ValueError(f"no Grad-CAM target layer could be inferred for {type(model).__name__}")

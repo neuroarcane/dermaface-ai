@@ -65,3 +65,9 @@ def test_vgg16_backbone_builds():
     model = build_model(cfg)
     assert model.classifier[-1].out_features == cfg.num_classes
     assert isinstance(get_gradcam_target_layer(model, cfg), nn.Conv2d)
+
+    # Regression: the target layer must be inferred from the MODEL, not cfg.backbone.
+    # In the app, a vgg16 checkpoint loads while cfg.backbone is still the default
+    # (resnet50); keying off cfg.backbone used to pick model.layer4 and crash.
+    mismatched = replace(load_config(), backbone="resnet50")  # default, != the vgg16 model
+    assert isinstance(get_gradcam_target_layer(model, mismatched), nn.Conv2d)
