@@ -482,6 +482,29 @@ both weaker *and* also unfair — but **with the fairness gap stated up front an
 straight into the app (the factory already supports `vgg16`) and we regenerate the FP/FN + Grad-CAM
 plates for the selected model.
 
+### 7.3 Beyond the test set — a real-world failure (the deployment gap)
+
+Test-set macro-F1 of 0.727 is **in-distribution** (clinical dermatology images). Run the *deployed
+app* on a **normal, well-lit face selfie** and it fails: a clear-skinned portrait is classified
+**redness at 85% confidence** (probs: redness 0.85 · acne 0.08 · clear 0.04 · rosacea 0.03). This is
+**expected, and arguably the most instructive result in the project:**
+
+- **The `clear`=SCIN source confound (§1.1) bites here.** Every `clear` training image is a SCIN
+  consumer photo of *body parts* (feet/arms) — **never a clean face portrait** — while the
+  *conditions* are Fitzpatrick clinical *faces*. So a face portrait resembles the "condition"
+  distribution and is pushed away from "clear."
+- **Out-of-distribution input.** The model was trained on dermatology imagery, not selfies.
+- **Grad-CAM confirms the mechanism:** the heatmap fires on **cheeks, neck, shoulders and
+  background** — image *style / warmth / framing*, not any skin pathology.
+- **Overconfident and wrong (85%).** The model has no calibrated sense of "I haven't seen this."
+
+*This does not contradict the 0.727 metric* — it exposes the gap between **benchmark performance and
+deployment**, which is precisely why the product is framed as *screening, not diagnosis* and always
+defers to a professional. It also sharpens the top future-work item: the **`clear` class needs real,
+multi-source face data**, plus **confidence calibration / an out-of-distribution guard**, before
+this would be trustworthy on real users. *(Figure: `realworld_failure` — in the notebook; not
+committed, license/privacy.)*
+
 ## 8. Fairness analysis ✅ (all three models scored by band)
 
 **Reporting decision:** report fairness across **skin-tone bands (I-II / III-IV / V-VI)** as
