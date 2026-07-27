@@ -14,7 +14,7 @@ from typing import Any
 
 from dermaface.config import Config, load_config
 
-_SUPPORTED = {"resnet18", "resnet50", "efficientnet_b0"}
+_SUPPORTED = {"resnet18", "resnet50", "efficientnet_b0", "vgg16"}
 
 
 def build_model(cfg: Config | None = None) -> Any:
@@ -42,6 +42,10 @@ def build_model(cfg: Config | None = None) -> Any:
         model = models.efficientnet_b0(weights=weights)
         in_features = model.classifier[-1].in_features
         model.classifier[-1] = nn.Linear(in_features, cfg.num_classes)
+    elif cfg.backbone == "vgg16":
+        model = models.vgg16(weights=weights)
+        in_features = model.classifier[-1].in_features
+        model.classifier[-1] = nn.Linear(in_features, cfg.num_classes)
     else:  # pragma: no cover - guarded above
         raise ValueError(cfg.backbone)
 
@@ -65,4 +69,10 @@ def get_gradcam_target_layer(model: Any, cfg: Config | None = None) -> Any:
         return model.layer4[-1]
     if cfg.backbone == "efficientnet_b0":
         return model.features[-1]
+    if cfg.backbone == "vgg16":
+        # vgg16's feature stack ends in a MaxPool; hook the last conv before it.
+        from torch import nn
+
+        convs = [m for m in model.features if isinstance(m, nn.Conv2d)]
+        return convs[-1]
     raise ValueError(f"no target layer configured for {cfg.backbone!r}")

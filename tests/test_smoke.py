@@ -50,3 +50,18 @@ def test_real_prediction_when_checkpoint_present():
     assert result.condition in CLASS_NAMES
     assert abs(sum(result.condition_probs.values()) - 1.0) < 1e-5
     assert 0.0 <= result.confidence <= 1.0
+
+
+def test_vgg16_backbone_builds():
+    # vgg16 is part of the model bake-off; make sure the factory + Grad-CAM target
+    # support it so a trained vgg16 checkpoint is loadable. Skipped in CI (no torch).
+    pytest.importorskip("torch")
+    pytest.importorskip("torchvision")
+    from torch import nn
+
+    from dermaface.models import build_model, get_gradcam_target_layer
+
+    cfg = replace(load_config(), backbone="vgg16", pretrained=False)  # no weights download
+    model = build_model(cfg)
+    assert model.classifier[-1].out_features == cfg.num_classes
+    assert isinstance(get_gradcam_target_layer(model, cfg), nn.Conv2d)
