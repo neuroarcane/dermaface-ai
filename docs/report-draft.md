@@ -55,11 +55,19 @@ professional care. *Not* a diagnostic device.
 Additional sources under license review (per Day-1 report): ACNE04, DDI (for fairness/eval).
 
 **Acquisition challenges (real, worth reporting):** most of **Fitzpatrick17k's** image
-source URLs are dead/migrated, so only a small fraction was directly downloadable — the team
-requested the images from the authors and is leaning on additional sources (SCIN downloaded
-cleanly; ACNE04/DDI under review) to compensate. The dataset **license also prohibits hosting
-images in a public repo**, so raw data is kept in external storage and never committed
-(consistent with the repo's gitignore). These are good "challenges + how we handled it" material.
+source URLs are dead/migrated, so only a small fraction was directly downloadable. The team
+then **obtained the official dataset through the Fitzpatrick17k access form** (granted by the
+authors, M. Groh et al.), which is now our **cited source of provenance** — not the interim
+Kaggle mirror used during early development (the mirror's images are byte-identical: filenames
+are content MD5s matching our manifest keys, so no retraining is needed). SCIN downloaded
+cleanly over HTTPS from its public bucket; ACNE04/DDI remain under review.
+
+**Data governance (license terms — state in the report):** the access grant restricts use to
+scientific/medical research and **requires deleting the Fitzpatrick images from all devices once
+the research is complete** — logged as a wrap-up compliance task. The license also **prohibits
+hosting images in a public repo**, so raw data lives in external storage and is never committed
+(enforced by the repo's gitignore). Full provenance + license detail: `docs/PROVENANCE.md`.
+These are good "challenges + how we handled it / responsible-data" material.
 
 **Data analysis / EDA.** ⬜ *Pending data acquisition (Aparna + Rolando).* For images we will
 plot: class balance, Fitzpatrick skin-tone distribution, and image-quality summaries.
@@ -161,9 +169,12 @@ flushing) that distinguish them. This is the **intended role** of the Basic CNN:
 from-scratch baseline for the pretrained models (ResNet50, VGG16) to beat. If they don't improve
 materially on the erythema classes, the bottleneck is data, not architecture.
 
-**Comparison models (Varsha + Iva — backbones TBD):** 🟡 Varsha's model is trained; Iva's is in
-progress. Same eval contract; the three sets of numbers get consolidated into one table for the
-final report.
+**Comparison models:** 🟡 **Varsha — VGG16** trained (grid-searched; promising preliminary
+macro-F1 ≈ 0.73, which would clear the P2 ≥ 0.60 target); **Iva** — in progress. ⚠️ *Before these
+enter the comparison table, they must be re-scored on the **frozen test set** via
+`dermaface.training.metrics` — the same contract the CNN used — since grid-search / CV numbers are
+not comparable to a held-out test score.* The model factory now supports `vgg16` alongside
+resnet/efficientnet, so the winning checkpoint loads in the app directly.
 
 ## 8. Fairness analysis 🟡 (method decided; results pending)
 
@@ -248,6 +259,7 @@ Process lessons so far:
 
 ### Decisions after Standup 2
 - **2026-07-17 — Data pipeline delivered:** Rolando's PR acquires all 3 datasets (1,614 images via an MD5-matched Kaggle mirror, dodging the dead URLs), with harmonized manifest, label map, stratified frozen splits, QA report, and passing tests. Raw data stays out of git (license) — hosted on a shared team Google Drive.
+- **2026-07-27 — Official Fitzpatrick17k provenance:** Aparna secured the dataset via the authors' official access form (M. Groh). We cite the official copy (not the Kaggle mirror) — the two are byte-identical (MD5-keyed), so **no retraining**. License requires deleting the images at project end (compliance to-do). Provenance recorded in `docs/PROVENANCE.md` (Rolando).
 - **2026-07-17 — Framework = PyTorch:** team unified on PyTorch (the whole stack was already PyTorch; Varsha porting her Keras baseline over) to avoid a split model/dataloader stack.
 - **2026-07-18 — Sprint-2 data cleaning done (Rolando + Aparna):** 1,614 → 1,559 rows (dropped unknown skin type + perceptual duplicates); class imbalance via **weighted loss** (`class_weights.json`, not oversampling); test set re-frozen with ≤1pt drift; erythema-safe train-only augmentation. See §2.
 - **2026-07-18 — Fairness reporting = skin-tone bands:** report I-II / III-IV / V-VI as primary (per-type shown with sample sizes) because type-VI coverage is too thin for per-type metrics. See §8.
