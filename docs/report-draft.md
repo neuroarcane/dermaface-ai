@@ -24,6 +24,13 @@ marking the regions that drove the prediction; and (4) confidence, limitations, 
 **It is framed as screening & education, not diagnosis** — this constraint shapes every UI
 and reporting decision (see [ethics-and-disclaimer.md](ethics-and-disclaimer.md)).
 
+> **Reading this as a story.** The interesting part of this project isn't the final 0.727 — it's
+> *how we got there*: fixing success criteria up front, a data acquisition that nearly ate two
+> sprints, decisions reversed as evidence arrived (Keras→PyTorch, severity de-scoped), a from-scratch
+> baseline that failed *on purpose* to point at the real bottleneck, and a three-model progression
+> whose plot twist was a **fairness gap that only appeared once the models got good**. **§0.3** tells
+> that arc; **§7.2** shows the model-by-model progression; the **Appendix** has the raw standup log.
+
 ## 0.1 Success criteria — set up front ✅
 
 Per the project sponsor's guidance, we defined measurable targets **before** modelling and
@@ -91,13 +98,34 @@ and the schedule was gated almost entirely by **data**. The arc:
    training was dropped under time pressure in favour of **one model per person** — a from-scratch
    **CNN** (Ali), **ResNet50** (Iva), **VGG16** (Varsha) — compared on one metric set, so we could
    show *alternatives + why* rather than a single unexplained choice.
-6. **Where we are (Sprint 4).** The CNN baseline is trained and (as intended) weak; the pretrained
-   models are landing; final model selection is pending their frozen-test numbers (§7).
+6. **The modelling story (Sprints 2–4) — three models, one plot twist.** We trained the three in
+   sequence and let each result set up the next:
+   - The **from-scratch CNN** landed at **macro-F1 0.35 — below the majority-class baseline**. Not a
+     failure of effort but a *diagnosis*: on ~1,000 images a fresh network only learns
+     "clear vs. not-clear," not the fine differences between three red conditions. **Verdict: the
+     bottleneck is data/representation → borrow pretrained features.**
+   - **ResNet50** (transfer learning) nearly **doubled** that to **macro-F1 0.67** and cleared the
+     accuracy bar — confirming the diagnosis. But it introduced the project's **plot twist:** it
+     **failed the fairness check** (0.25 gap), scoring far worse on the darkest-skin band. The weak
+     CNN had "passed" fairness only by being *uniformly* bad; the instant a competent model arrived,
+     the gap it had been masking appeared. **Getting good is what exposed who the tool wasn't good
+     for.**
+   - **VGG16** (grid-search-tuned) took the top spot at **macro-F1 0.727 / accuracy 0.74** and was
+     **selected as the final model** (§7).
+7. **What the story adds up to.** The headline isn't "we reached 0.73." It's that we can **explain
+   every number**: why the from-scratch baseline failed, why transfer learning fixed it, and why the
+   fairness gap is a **data-coverage** problem (only 16 dark-skin test images) rather than an
+   algorithm quirk — which is why *"collect more dark-skin data (DDI)"* is our **top future-work
+   item, not an afterthought**. The final model ships **with that limitation stated up front**,
+   because a screening tool that quietly works better on light skin would do harm. That trajectory —
+   framing → data struggle → baseline → transfer learning → a fairness reckoning → an honest,
+   caveated final model — *is* the project.
 
 **How decisions were made:** measurable criteria first, then **data-driven** calls (severity,
-fairness, face-filter all decided by counting the data), with a bias toward the *task-appropriate*
-choice over the fanciest one (e.g. rejecting YOLO — §3). Reversible calls were made provisionally
-and flagged, not blocked on.
+fairness, face-filter, and the model choice itself all settled by the numbers, not opinion), with a
+bias toward the *task-appropriate* choice over the fanciest one (e.g. rejecting YOLO — §3).
+Reversible calls were made provisionally and flagged, not blocked on — which is what let a
+7-person team keep moving while the data caught up.
 
 ---
 
@@ -544,6 +572,12 @@ Process lessons so far:
   learning with evidence instead of assumption.
 - **Decide from the data.** Severity de-scope, fairness-by-bands, and not-face-filtering were all
   settled by **counting the data**, not by opinion — and documented as honest limitations.
+- **Competence can *expose* a fairness gap, not just create one.** Our weakest model "passed" the
+  fairness check by being **evenly bad**; our best model revealed a **0.25 dark-skin gap**. A single
+  headline metric hides *who* a model works for — measuring per skin-tone band from the outset is
+  what caught it. Root cause was **data coverage** (few dark-skin images), so we report it as a
+  **headline limitation with a remediation plan**, not a footnote — the most important thing we
+  learned.
 - **Scope discipline** — grew from 5 → 7 members by pairing newcomers into existing workstreams rather than adding features.
 - **CI-gated workflow** — self-merge once `ruff` + `pytest` pass keeps a 7-person team moving without review bottlenecks.
 - **Model choice** — resisting the "use the fanciest model (YOLO)" pull in favour of the task-appropriate one (classification + Grad-CAM); YOLO was **evaluated on paper and rejected, never trained**.
