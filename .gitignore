@@ -48,3 +48,6 @@ lightning_logs/
 .idea/
 .vscode/
 *.swp
+
+# Generated example-image plates — never commit (Fitzpatrick license forbids public image hosting)
+/docs/eval_reports/figures/
