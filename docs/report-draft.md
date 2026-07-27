@@ -36,13 +36,76 @@ Headline targets:
 
 **Target vs. Actual** is tracked in [model-card.md](model-card.md); Actual is filled after training.
 
+## 0.2 Business case — why this tool 🟡
+
+**The problem.** Acne, rosacea, and facial redness are among the most common skin complaints,
+yet access to a dermatologist is slow and expensive: in many regions the wait for a routine
+appointment is weeks to months, and a large share of visits are for conditions that are visually
+recognisable and often self-managed. People instead self-diagnose with web searches that return
+alarming, unranked results, or they do nothing. The gap is **triage**, not diagnosis: helping a
+person decide *"is this worth getting looked at, and roughly what am I looking at?"*
+
+**Who it's for and the value.** A first-line, phone-based **screening & education** aid for
+non-experts. Value: (1) **reassurance or a nudge to seek care**, earlier than a booked
+appointment; (2) **plain-language education** about what the condition looks like; (3) a
+**Grad-CAM overlay** so the user sees *why* the tool flagged a region, building appropriate
+(not blind) trust. For a course/portfolio context it also demonstrates an end-to-end applied-ML
+product: data governance → model bake-off → evaluation → a deployed app.
+
+**Why now / why feasible.** Public dermatology datasets (Fitzpatrick17k, SCIN) and mature
+transfer-learning backbones make a credible prototype achievable in a short sprint on a laptop.
+
+**Explicitly a non-goal.** This is **not a diagnostic device** and is not a substitute for a
+clinician. Every screen ends in "see a professional," severity is de-scoped in v1, and the model
+is measured for **fairness across skin tones** because a screening tool that works only on light
+skin would do harm. This framing is a product decision, not a disclaimer bolted on at the end —
+it shapes the UI, the metrics, and the scope (see §0.1, §8).
+
+## 0.3 Project history — how our thinking evolved 🟡
+
+*(Sponsor asked for the journey, not just the destination. Full standup log: Appendix A.)*
+
+The project did **not** run in a straight line; several core decisions were revised as we learned,
+and the schedule was gated almost entirely by **data**. The arc:
+
+1. **Framing first (Sprint 1 start).** Before any modelling we fixed measurable **success criteria**
+   up front (sponsor's explicit requirement) — beat baseline, macro-F1 ≥ 0.60, per-class recall
+   ≥ 0.50, fairness gap ≤ 0.15 — so the project would be judged target-vs-actual, not vibes.
+2. **Data became the critical path — and slipped (Sprint 1, the main slowdown).** Most of
+   Fitzpatrick17k's original image URLs are **dead/migrated**, so only a fraction downloaded
+   directly. We lost roughly a sprint here: we emailed the authors, stood up an **interim
+   Kaggle mirror** (MD5-matched so it's byte-identical) to keep moving, and later secured the
+   **official copy via the access form**. The dataset **license also forbids hosting images in a
+   public repo**, forcing an external-storage workflow. A teammate's ISP outage and a member
+   splitting time with another course's project added drag. *Everything downstream — training,
+   evaluation, the app's real predictions — waited on this*, which is why Sprints 1–2 look
+   data-heavy and model-light.
+3. **Framework changed: Keras → PyTorch (2026-07-17).** An early Keras baseline existed, but the
+   rest of the stack (app, Grad-CAM, dataloaders) was PyTorch. Rather than maintain a split
+   stack, we **unified on PyTorch** and ported the baseline over.
+4. **Scope trimmed on evidence, not opinion.** **Severity was de-scoped** for v1 once the data
+   showed only 6 "severe" / 29 "mild" labels — too sparse to learn. **Fairness reporting moved to
+   skin-tone bands** (I-II / III-IV / V-VI) because per-Fitzpatrick-type test counts were as low as
+   3. We chose **not to hard-filter to detected faces** (would have cut the set to ~293 images).
+5. **Modelling plan changed: one model → a three-model bake-off.** A planned 3-person pairing on
+   training was dropped under time pressure in favour of **one model per person** — a from-scratch
+   **CNN** (Ali), **ResNet50** (Iva), **VGG16** (Varsha) — compared on one metric set, so we could
+   show *alternatives + why* rather than a single unexplained choice.
+6. **Where we are (Sprint 4).** The CNN baseline is trained and (as intended) weak; the pretrained
+   models are landing; final model selection is pending their frozen-test numbers (§7).
+
+**How decisions were made:** measurable criteria first, then **data-driven** calls (severity,
+fairness, face-filter all decided by counting the data), with a bias toward the *task-appropriate*
+choice over the fanciest one (e.g. rejecting YOLO — §3). Reversible calls were made provisionally
+and flagged, not blocked on.
+
 ---
 
 ## 1. Dataset details 🟡
 
 **Business problem.** Common inflammatory skin conditions (acne, rosacea, redness) are
 widespread; a lightweight screening/education tool could help users decide whether to seek
-professional care. *Not* a diagnostic device.
+professional care. *Not* a diagnostic device. (Full business case: §0.2.)
 
 **Datasets (large, publicly available skin-image collections):**
 
@@ -69,15 +132,43 @@ hosting images in a public repo**, so raw data lives in external storage and is 
 (enforced by the repo's gitignore). Full provenance + license detail: `docs/PROVENANCE.md`.
 These are good "challenges + how we handled it / responsible-data" material.
 
-**Data analysis / EDA.** ⬜ *Pending data acquisition (Aparna + Rolando).* For images we will
-plot: class balance, Fitzpatrick skin-tone distribution, and image-quality summaries.
+### 1.1 The four classes (with examples)
 
-*Depth to add later:* why these datasets, their known biases, licensing constraints, what's
-missing, and how class/skin-tone skew is expected to affect results.
+The task is **4-class, single-label** condition classification. Class definitions and the
+cleaned-dataset counts (1,558 images total):
+
+| Class | What it looks like | Total | Train / Eval / Test | Main source(s) |
+|---|---|---|---|---|
+| **acne** | Comedones, papules, pustules — discrete lesions | 623 | 434 / 95 / 63 | Fitzpatrick (505) + SCIN (118) |
+| **redness** | Diffuse erythema / inflammation, non-acne, non-rosacea | 471 | 328 / 73 / 48 | Fitzpatrick (449) + SCIN (22) |
+| **rosacea** | Central-face erythema, flushing, telangiectasia | 202 | 140 / 30 / 22 | Fitzpatrick (161) + SCIN (41) |
+| **clear** | No target condition present | 262 | 183 / 40 / 25 | **SCIN only (262)** |
+
+**Example images:** a per-class example plate (a row of representative images for each class) is
+generated **in the notebook** from the local data and embedded in the final PDF/Word deliverable.
+It is **not committed to the repo** — the Fitzpatrick license forbids hosting images publicly
+(§0.2, PROVENANCE.md). *[figure: `class_examples` — see notebook output.]*
+
+**⚠️ Source confound (important, honest limitation).** `clear` images come **entirely from SCIN**
+(consumer phone photos), while acne/redness/rosacea are **mostly Fitzpatrick** (clinical/atlas
+images). The two sources differ in lighting, framing, and resolution, so a model can get
+`clear`-vs-not partly right by learning **image *style*, not skin** — which likely inflates the
+`clear` recall we see (§7) and would not transfer to real single-source deployment photos.
+*Mitigations:* report this openly; where possible mix sources per class in future data; sanity-check
+with Grad-CAM that the model attends to skin, not background/framing.
+
+**Class balance & skew.** acne is the majority class (~40%); rosacea the minority (~13%). This
+imbalance is handled by a **class-weighted loss**, not resampling (§2), and is why we report
+**macro-F1** and **per-class recall**, not accuracy alone.
+
+**Data analysis / EDA.** ✅ Data acquired and cleaned (Aparna + Rolando). EDA plots (class balance,
+Fitzpatrick skin-tone distribution, source mix, image-quality summaries) are produced in the
+notebook. *Depth to add:* known dataset biases (lighter-skin skew — §8), the source confound above,
+and how each is expected to affect results.
 
 ## 2. Preprocessing 🟡 (Sprint-2 data work done; Rolando + Aparna)
 
-**Cleaning:** 1,614 → **1,559** rows — dropped 35 with unknown Fitzpatrick type and 21
+**Cleaning:** 1,614 → **1,558** rows — dropped 35 with unknown Fitzpatrick type and 21
 perceptual-hash duplicate images. Every surviving row validates (real class + real skin type,
 no unknowns).
 
@@ -105,14 +196,30 @@ which is the whole signal for redness/rosacea. A test fails if anyone raises the
   PyTorch — the package scaffold, the Streamlit app, Grad-CAM (pytorch-grad-cam), and the data
   pipeline's `torch` dataloaders. A brief Keras baseline existed, but the team **unified on
   PyTorch** to avoid a split model/dataloader stack; Varsha is porting her model to torchvision.
-- **Backbone: ResNet50** (ImageNet-pretrained). *Why:* reliable for transfer learning, strong
-  performance/compute balance for 224×224 classification, well-supported. (Decision: Iva.)
-- **Alternatives considered:**
-  - *Train a CNN from scratch* (option 3-1) — kept as a **from-scratch baseline** for comparison.
-- **Model comparison (Sprint 2):** we train and compare **three** models, one per team member — a baseline **CNN (6-layer, from scratch; Ali)** plus one fine-tuned pretrained model each from **Varsha** and **Iva** — then pick the best on a common metric set. *(Varsha's and Iva's specific backbones TBD — to be filled in from their runs; a from-scratch baseline vs. two pretrained backbones is good "alternatives + why" evidence.)*
-  - *YOLO / object detection* — **rejected**: our task is whole-image *classification* with
-    Grad-CAM localization, and our datasets have no lesion bounding boxes; YOLO would also make
-    Grad-CAM redundant. (Good "alternatives considered" material for the report.)
+- **Primary pretrained backbone: ResNet50** (ImageNet-pretrained). *Why:* reliable for transfer
+  learning, strong performance/compute balance for 224×224 classification, well-supported.
+  (Decision: Iva.) The bake-off below tests it against VGG16 and the from-scratch CNN.
+- **Model comparison (the bake-off):** we train and compare **three** models — one per person —
+  on the **same data, splits, and metrics**, then pick the best. This gives us *alternatives + why*
+  rather than one unexplained choice. **The three models (referred to by these names throughout):**
+
+  | Model | Architecture | Type | Owner | Status |
+  |---|---|---|---|---|
+  | **Basic CNN** | 6-conv-block CNN | From scratch | Ali | ✅ Trained (weak baseline) |
+  | **ResNet50** | ResNet-50 backbone | Transfer learning (ImageNet) | Iva | 🟡 In progress |
+  | **VGG16** | VGG-16 backbone | Transfer learning (ImageNet) | Varsha | 🟡 Trained; frozen-test re-score pending |
+
+  The Basic CNN is the deliberately-weak floor the two pretrained models must beat; if they don't
+  clearly beat it, the bottleneck is data, not architecture.
+
+- **Alternatives considered but rejected:**
+  - *YOLO / object detection* — **considered and rejected; never trained** (so there are **no YOLO
+    hyperparameters to report**). Our task is whole-image **classification** with Grad-CAM
+    localization, and our datasets have **no lesion bounding boxes** to train a detector on; YOLO
+    would also make Grad-CAM redundant. Choosing the task-appropriate model over the "fanciest" one
+    is a deliberate call (see §13).
+  - *Training a from-scratch CNN as the primary model* — kept only as the **baseline**, not the
+    product model: too little data to learn strong features from scratch (borne out in §7).
 
 **Severity: DE-SCOPED for v1 (condition-only).** Severity labels exist for only ~16% of images
 and are heavily skewed (**6 "severe" / 29 "mild"** total), too sparse to train a reliable
@@ -122,16 +229,59 @@ mild/moderate/severe) is documented as **future work** in [severity-decision.md]
 
 *Depth to add later:* freezing schedule, why pretrained over from-scratch, head design.
 
-## 4. Hyperparameter tuning ⬜ (planned, "good to have")
+## 4. Hyperparameter tuning 🟡
 
-Planned search over learning rate, batch size, and augmentation strength; report what
-mattered most and what surprised us.
+**Shared configuration (all three models, from `dermaface/config.py`)** — held **fixed across
+models on purpose** so the bake-off compares *architectures*, not tuning luck:
 
-## 5. Training & validation ⬜ (pending)
+| Hyperparameter | Value | Note |
+|---|---|---|
+| Input size | 224 × 224 | ImageNet-standard for the pretrained backbones |
+| **Batch size** | **32** | see batch-size discussion below |
+| Epochs | 20 | best-val-macro-F1 checkpoint kept (early-stopping by selection) |
+| Optimizer | Adam | — |
+| Learning rate | 1e-4 | conservative for fine-tuning pretrained weights |
+| Weight decay | 1e-4 | mild regularisation |
+| Loss | Class-weighted cross-entropy | weights from `class_weights.json` (rosacea ≈ 3.1× acne) |
+| Normalisation | ImageNet mean/std | matches pretrained backbones |
+| Augmentation | flip / rotation / crop / mild brightness-contrast | **hue & saturation locked at 0** (erythema-safe, §2) |
+| Seed | 42 | fixed for reproducibility |
 
-Will track **training loss & accuracy** and analyze train/validation via history/TensorBoard;
-include loss/accuracy curves and note over/underfitting signs and interventions.
-*Blocked on:* the processed manifest (Aparna + Rolando) → training loop (Varsha).
+**Did we evaluate different batch sizes?** Batch size was **fixed at 32** for the head-to-head so
+the three models are directly comparable, and because 32 fits comfortably in laptop memory (§11).
+We did **not** run a systematic batch-size sweep on the Basic CNN — a larger sweep is listed as
+future work. The one place tuning *did* happen is **VGG16**, where Varsha ran a **grid search
+(GridSearchCV)** over hyperparameters; that search is *why* its preliminary numbers must be
+re-scored on the frozen test set before comparison (§7) — grid-search/CV scores use different data
+folds and aren't comparable to a single held-out test score.
+
+**What was tuned, per model (honest):**
+- **Basic CNN** — no search; ran the shared config above. It's a baseline, so tuning effort was
+  deliberately not spent here.
+- **VGG16** — grid search over hyperparameters (Varsha); best configuration reported preliminarily.
+- **ResNet50** — shared config; any tuning to be recorded when Iva's run lands.
+
+*Depth to add when the pretrained runs finish:* which knob moved the metric most, and what
+surprised us (e.g. whether more epochs helped or just overfit the majority class).
+
+## 5. Training & validation 🟡
+
+**Loop (identical for all three models):** each epoch runs train then validation; we track loss,
+accuracy, and **macro-F1**, and checkpoint the **best validation macro-F1** (not the last epoch)
+to `models/dermaface_best_<arch>.pt`. Metrics come from `dermaface.training.metrics` so the numbers
+match evaluation. Loss/accuracy curves are plotted **in the notebook** per model.
+
+**Basic CNN (Ali) — done.** Trained 20 epochs on the cleaned train split (1,085 images), CPU
+(§11). Best **validation macro-F1 = 0.386 at epoch 20**. *Over/underfitting read:* this is
+**underfitting**, not overfitting — even the *training* signal stays weak, and validation macro-F1
+never rises far above chance. The from-scratch network simply lacks the capacity/data to learn the
+fine-grained cues separating the three erythema conditions (§7). *Intervention that mattered:* the
+**class-weighted loss** — without it the model collapses almost entirely onto the majority class;
+with it, the minority `rosacea`/`redness` recalls become non-trivial (0.45 / 0.42) even though
+overall accuracy stays low. The lesson carried to the pretrained models: the ceiling here is
+representation quality, which is exactly what transfer learning is meant to raise.
+
+**ResNet50 / VGG16:** curves + best-epoch to be filled in from Iva's and Varsha's runs.
 
 ## 6. Prediction 🟡 (real inference wired; awaiting the winning model)
 
@@ -169,12 +319,79 @@ flushing) that distinguish them. This is the **intended role** of the Basic CNN:
 from-scratch baseline for the pretrained models (ResNet50, VGG16) to beat. If they don't improve
 materially on the erythema classes, the bottleneck is data, not architecture.
 
+**Basic CNN — confusion matrix (frozen test set, rows = true, cols = predicted):**
+
+| true ↓ / pred → | acne | rosacea | redness | clear | (support) |
+|---|---|---|---|---|---|
+| **acne** | **4** | 15 | 28 | 16 | 63 |
+| **rosacea** | 4 | **10** | 7 | 1 | 22 |
+| **redness** | 5 | 19 | **20** | 4 | 48 |
+| **clear** | 3 | 0 | 1 | **21** | 25 |
+
+### 7.1 False positives / false negatives — causes and "treatment"
+
+Reading the matrix (Basic CNN), the errors fall into three groups, ordered by how much they matter
+for a **screening** tool:
+
+1. **Condition → "clear" (false negatives — most harmful).** 16 acne, 4 redness, 1 rosacea image
+   were called **clear** — i.e. a person with a condition told nothing's there (false reassurance,
+   which could delay care). *Cause:* the from-scratch model only reliably learned the "clear look,"
+   partly a **source confound** (`clear` = SCIN photos, §1.1). *Treatment:* **product-level** — the
+   app never says "you're fine"; every screen ends in "see a professional," and low confidence is
+   shown, not hidden. **Model-level** — raise recall with a pretrained backbone + more data, and add
+   a confidence threshold that routes uncertain cases to *"inconclusive — seek advice."*
+2. **Condition ↔ condition confusion.** acne is massively under-called (recall 0.06; 28 of 63 acne
+   images predicted **redness**), and redness/rosacea trade errors. *Cause:* acne, rosacea and
+   redness are all **erythematous and visually adjacent**; a shallow model can't pick up papules
+   vs. telangiectasia vs. diffuse flushing. *Treatment:* transfer learning (in progress); if fine
+   separation stays hard, fall back to a coarser **"inflammatory vs. clear"** decision or a **top-2**
+   output rather than forcing one label.
+3. **"clear" → condition (false positives — least harmful).** A few clear images were flagged as a
+   condition. *Cause:* image noise/framing. *Treatment:* in a screening tool this errs the *safe*
+   way (toward "get checked"); calibrate the threshold and use Grad-CAM (§9) so the user sees the
+   evidence and isn't alarmed by a weak call.
+
+**Example FP/FN plates** (a few real misclassified images per error type, with true vs. predicted
+labels and Grad-CAM) are generated **in the notebook** and embedded in the final deliverable — not
+committed to the repo (license, §0.2). *[figures: `fp_examples`, `fn_examples` — see notebook.]*
+These will be refreshed for the **selected** model once the pretrained runs land.
+
 **Comparison models:** 🟡 **Varsha — VGG16** trained (grid-searched; promising preliminary
 macro-F1 ≈ 0.73, which would clear the P2 ≥ 0.60 target); **Iva** — in progress. ⚠️ *Before these
 enter the comparison table, they must be re-scored on the **frozen test set** via
 `dermaface.training.metrics` — the same contract the CNN used — since grid-search / CV numbers are
 not comparable to a held-out test score.* The model factory now supports `vgg16` alongside
 resnet/efficientnet, so the winning checkpoint loads in the app directly.
+
+### 7.2 Model comparison & selection (progression → final)
+
+All three models are scored the **same way** on the **same frozen test set** (`test_manifest.csv`,
+158 images) with `dermaface.training.metrics`. Selection metric = **macro-F1** (chosen up front for
+the class imbalance), with per-class recall and the fairness gap as tie-breakers/guards.
+
+| Model | Accuracy | Macro-F1 | Per-class recall (acne/ros/red/clear) | Fairness gap | Meets P2 (≥0.60)? |
+|---|---|---|---|---|---|
+| **Basic CNN** (baseline) | 0.35 | 0.35 | 0.06 / 0.45 / 0.42 / 0.84 | 0.064 ✅ | ❌ |
+| **ResNet50** (Iva) | — | *pending* | — | — | *pending* |
+| **VGG16** (Varsha) | *~0.74\** | *~0.73\** | *pending frozen-test* | *pending* | *likely ✅ (to confirm)* |
+
+*\*VGG16 numbers are preliminary **grid-search** figures, not yet the frozen-test score — shown
+greyed for progression only, **not** as the final result.*
+
+**The progression (how we're arriving at the final model).** (1) Establish a measurable bar
+(§0.1). (2) Train a **from-scratch CNN** to see how far raw architecture gets us on this data →
+**it fails every performance target** (macro-F1 0.35 < 0.60), telling us the bottleneck is
+representation/data, not effort. (3) Move to **transfer learning** (ResNet50, VGG16) to borrow
+ImageNet features → VGG16's early numbers (~0.73) already clear the bar, confirming the diagnosis.
+(4) Re-score the pretrained models on the frozen test set and **pick the best macro-F1** that also
+holds the fairness gap.
+
+**Final selection: 🟡 PROVISIONAL — pending the two frozen-test scores.** On current evidence the
+final model will be **one of the pretrained backbones (VGG16 or ResNet50), not the Basic CNN**, and
+VGG16 is the front-runner. We will lock it once Varsha's frozen-test re-score and Iva's ResNet50 run
+are in, then load that checkpoint into the app and regenerate the FP/FN + Grad-CAM plates for it.
+*The honest state today: baseline characterised, pretrained models landing, winner not yet
+certified — recorded this way on purpose so the report shows the reasoning, not a fabricated result.*
 
 ## 8. Fairness analysis 🟡 (method decided; results pending)
 
@@ -202,15 +419,42 @@ prediction. Before a checkpoint exists the app still shows a clearly-labelled il
 examples, and misleading heatmaps. IoU/localization scoring only if valid masks/boxes/proxy
 regions exist; otherwise document qualitatively.
 
-## 10. Interpretation of results ⬜ (pending)
+## 10. Interpretation of results 🟡
 
-What the metrics mean for a *screening* tool (not diagnosis): which errors are "safe" vs.
-concerning, whether we'd trust it and why, real-world constraints.
+**What the numbers mean for a *screening* tool.** The right lens is not raw accuracy but *which
+errors happen and how costly each is* (§7.1):
+- **"Safe" errors** — flagging clear skin as a condition (false alarm). The tool then says "get it
+  checked," which is the conservative, low-harm direction for screening.
+- **Concerning errors** — telling someone with a condition they're **clear** (false reassurance),
+  which could delay care. These are the errors we most want to drive down, and why the product
+  **never gives an all-clear** and always routes to a professional.
+- **Adjacent-condition mix-ups** (acne↔redness↔rosacea) matter less for the core "should I get
+  this looked at?" decision than clear-vs-not does, though they matter for the *education* value.
 
-## 11. Hardware & memory ⬜ (pending)
+**Would we trust the Basic CNN?** No — and we say so. At macro-F1 0.35 it's below the majority
+baseline and would mislead users; it exists to prove the pipeline and set the floor. The product
+decision is to ship **only** a model that clears the up-front bar (macro-F1 ≥ 0.60, per-class
+recall ≥ 0.50) **and** holds the fairness gap — which is why selection waits on the pretrained
+runs (§7.2). Until then the app shows the low-confidence warning honestly.
 
-Record training environment (GPU/TPU/CPU), memory used, and training time; note reproducibility
-(fixed seeds, frozen test set).
+**Real-world constraints to state plainly:** the **source confound** (§1.1) means test numbers may
+be optimistic vs. real single-source photos; **dark-skin coverage is thin** (§8), so we don't claim
+equal performance there; and severity is **out of scope** in v1.
+
+## 11. Hardware & memory 🟡
+
+**Training environment:** Apple **M5** (10-core), **24 GB** RAM, macOS. Training ran on **CPU** —
+the notebook selects `cuda` if present else CPU, and there is **no CUDA GPU** on this machine (MPS
+is available but not used by the current loop, a noted future optimisation). This is a deliberate
+point: the whole pipeline is **laptop-trainable**, no cloud GPU required.
+
+**Footprint & time:** batch size 32 at 224×224 keeps memory well within 24 GB. The from-scratch
+**Basic CNN** (≈1M params) trains its 20 epochs in **minutes** on CPU; the pretrained backbones
+(**ResNet50** ≈25M, **VGG16** ≈138M params) are heavier and take correspondingly longer — exact
+wall-clock per run to be recorded by Iva/Varsha and tabulated here.
+
+**Reproducibility:** fixed **seed 42**, a **frozen** test split never tuned on, a versioned data
+manifest, and shared config/metrics so every model is trained and scored identically.
 
 ## 12. Next steps ⬜ (to finalize)
 
@@ -225,9 +469,18 @@ data, severity validation against a rubric, clinician feedback) — not just "co
 ## 13. Lessons learned 🟡 (in progress)
 
 Process lessons so far:
+- **Data was the critical path — and we under-estimated it.** Dead Fitzpatrick URLs + licensing
+  cost us roughly a sprint and gated everything downstream (§0.3). What worked: an **interim
+  MD5-matched mirror** to unblock training while the official access came through, and treating data
+  acquisition as a first-class workstream, not a prerequisite assumed "done."
+- **Baseline first pays off.** The deliberately-weak from-scratch CNN wasn't wasted effort — it
+  **told us the bottleneck is data/representation, not tuning**, which justified moving to transfer
+  learning with evidence instead of assumption.
+- **Decide from the data.** Severity de-scope, fairness-by-bands, and not-face-filtering were all
+  settled by **counting the data**, not by opinion — and documented as honest limitations.
 - **Scope discipline** — grew from 5 → 7 members by pairing newcomers into existing workstreams rather than adding features.
 - **CI-gated workflow** — self-merge once `ruff` + `pytest` pass keeps a 7-person team moving without review bottlenecks.
-- **Model choice** — resisting the "use the fanciest model (YOLO)" pull in favour of the task-appropriate one (classification + Grad-CAM).
+- **Model choice** — resisting the "use the fanciest model (YOLO)" pull in favour of the task-appropriate one (classification + Grad-CAM); YOLO was **evaluated on paper and rejected, never trained**.
 
 *Per-person + team reflections to be completed at the end.*
 
@@ -235,12 +488,12 @@ Process lessons so far:
 
 | Member | Contributions so far |
 |---|---|
-| Hessam (Product Lead) | Scope, disclaimer/ethics framing, Day-1 setup report, coordination |
-| Iva (ML Research) | Backbone decision (ResNet50), severity method (concept-derived proxy), metrics implementation + tests |
-| Aparna + Rolando (Data) | Data acquisition + Sprint-2 cleaning: harmonized manifest, dedup + skin-type validation (1,614→1,559), weighted-loss imbalance handling, frozen splits (≤1pt drift), erythema-safe augmentation, QA + fairness-coverage findings |
-| Varsha (MLOps) | Baseline **CNN + ResNet** (PyTorch); leads training + model comparison (assigns models, defines metrics, consolidates); HF Spaces deploy; CI |
-| Temirlan (Eval & Explainability) | Trains one comparison model; metrics test support; Grad-CAM evidence set; evaluation + failure analysis |
-| Ali (UI/UX) | Streamlit app (upload/consent/disclaimer/UI states), Grad-CAM overlay display, standups/sprint tracking; #1 decision write-up (`severity-decision.md` + draft `severity_map`) |
+| Hessam (Product Lead) | Scope, disclaimer/ethics framing, Day-1 setup report, coordination; report editing |
+| Iva (ML Research) | Backbone decision (ResNet50), severity method (concept-derived proxy), metrics implementation + tests; **trains the ResNet50 model**; report editing |
+| Aparna + Rolando (Data) | Data acquisition + Sprint-2 cleaning: harmonized manifest, dedup + skin-type validation (1,614→1,558), weighted-loss imbalance handling, frozen splits (≤1pt drift), erythema-safe augmentation, QA + fairness-coverage findings; official Fitzpatrick provenance (Aparna) |
+| Varsha (MLOps) | Training/MLOps infrastructure (loop, checkpointing, CI); **trains the VGG16 model** (grid search); HF Spaces deploy |
+| Temirlan (Eval & Explainability) | Evaluation + failure-analysis support; Grad-CAM evidence set; metrics test support *(not a model trainer)* |
+| Ali (UI/UX) | Streamlit app (upload/consent/disclaimer/UI states), Grad-CAM overlay display; **trains the Basic CNN baseline + wrote its eval report**; **wired real inference + Grad-CAM into the app**; standups/sprint tracking; severity-decision write-up |
 
 ---
 
@@ -266,7 +519,7 @@ Process lessons so far:
 - **2026-07-17 — Data pipeline delivered:** Rolando's PR acquires all 3 datasets (1,614 images via an MD5-matched Kaggle mirror, dodging the dead URLs), with harmonized manifest, label map, stratified frozen splits, QA report, and passing tests. Raw data stays out of git (license) — hosted on a shared team Google Drive.
 - **2026-07-27 — Official Fitzpatrick17k provenance:** Aparna secured the dataset via the authors' official access form (M. Groh). We cite the official copy (not the Kaggle mirror) — the two are byte-identical (MD5-keyed), so **no retraining**. License requires deleting the images at project end (compliance to-do). Provenance recorded in `docs/PROVENANCE.md` (Rolando).
 - **2026-07-17 — Framework = PyTorch:** team unified on PyTorch (the whole stack was already PyTorch; Varsha porting her Keras baseline over) to avoid a split model/dataloader stack.
-- **2026-07-18 — Sprint-2 data cleaning done (Rolando + Aparna):** 1,614 → 1,559 rows (dropped unknown skin type + perceptual duplicates); class imbalance via **weighted loss** (`class_weights.json`, not oversampling); test set re-frozen with ≤1pt drift; erythema-safe train-only augmentation. See §2.
+- **2026-07-18 — Sprint-2 data cleaning done (Rolando + Aparna):** 1,614 → 1,558 rows (dropped unknown skin type + perceptual duplicates); class imbalance via **weighted loss** (`class_weights.json`, not oversampling); test set re-frozen with ≤1pt drift; erythema-safe train-only augmentation. See §2.
 - **2026-07-18 — Fairness reporting = skin-tone bands:** report I-II / III-IV / V-VI as primary (per-type shown with sample sizes) because type-VI coverage is too thin for per-type metrics. See §8.
 - **2026-07-18 — Faces (⏳ pending Iva's sign-off):** QA found ~81% of images have no *detectable* face (Fitzpatrick17k spans all body sites). Direction: **do not hard-filter** to faces (would shrink to ~293 images and drop valid facial close-ups the detector misses); instead train on the full cleaned set, tag the face flag, and report the body-site-vs-face mismatch as a **limitation**. Iva (ML lead) to confirm.
 - **2026-07-21 — Severity de-scoped for v1:** the cleaned data has only **6 "severe" / 29 "mild"** labels (~16% of images labelled at all), too sparse to train a reliable severity classifier. v1 ships **condition-only**; concept-derived proxy documented as future work. App shows "Severity: Not assessed." Provisional call by Ali; Iva informed (reversible). Closes the severity part of #1 / requirement F3.
