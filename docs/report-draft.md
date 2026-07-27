@@ -322,7 +322,7 @@ result — real output is never presented as a prediction without a model. The s
 **VGG16** (§7); the app still runs the Basic CNN locally until `dermaface_best_vgg16.pt` is in hand,
 at which point it's a drop-in swap (no code change) and we regenerate the Grad-CAM/FP-FN plates.
 
-## 7. Evaluation 🟡 (all three models scored; **VGG16 selected** — its per-class/fairness breakdown still to attach)
+## 7. Evaluation ✅ (all three models fully scored on the frozen test set; **VGG16 selected**)
 
 **Implemented (Iva):** `classification_metrics` (accuracy, macro-F1, macro precision/recall),
 `fairness_by_skin_type`, and `confusion` (sklearn), with 5 passing unit tests. This is the
@@ -409,17 +409,32 @@ vs the CNN (0.67 vs 0.35) and it clears the accuracy bar. acne recovers dramatic
 The model is materially weaker on the least-represented skin tones (a data-coverage problem, §8);
 for a screening tool that is a **serious limitation, not a footnote**.
 
-**Results — VGG16 (Varsha):** ✅ **confirmed final** (frozen test set). **accuracy 0.74,
-macro-F1 0.727, macro-precision 0.72, macro-recall 0.75.** Target-vs-Actual: **P1 ✅** (0.74 vs
-0.40 baseline), **P2 ✅** (0.727 ≥ 0.60). Tuned via **grid search** over hyperparameters (§4).
-**This is the best macro-F1 of the three → selected as the final model.**
+**Results — VGG16 (Varsha) — ✅ SELECTED FINAL MODEL:** frozen test set, same contract.
+**accuracy 0.74, macro-F1 0.727, macro-precision 0.72, macro-recall 0.75** (checkpoint
+`dermaface_best_vgg16.pt`, best val macro-F1 0.715 @ epoch 15; tuned via **grid search** —
+winner `lr_head=3e-4, weight_decay=1e-4`, §4). Per-class recall: **acne 0.76, rosacea 0.68,
+redness 0.67, clear 0.88**. Target-vs-Actual: **P1 ✅, P2 ✅** (0.727 ≥ 0.60), **P3 ✅ — the only
+model to pass** (every per-class recall ≥ 0.50), **Fa1 ✗** (band gap **0.281** > 0.15 — the
+*largest* of the three).
 
-> **Reporting gap to close (honest):** Varsha reported the four *aggregate* metrics only. VGG16's
-> **per-class recall (P3)**, **confusion matrix**, and **fairness-by-band (Fa1)** are **not yet in
-> hand** — they exist in her auto-generated `vgg16_eval_report.docx` and must be pulled in to
-> complete the comparison and, critically, to state VGG16's **fairness gap** (see §8). Given
-> ResNet50's 0.25 dark-skin gap stems from **shared data coverage**, VGG16 very likely has a
-> similar gap; we report the actual number, not an assumption.
+**VGG16 — confusion matrix (frozen test set):**
+
+| true ↓ / pred → | acne | rosacea | redness | clear | (support) |
+|---|---|---|---|---|---|
+| **acne** | **48** | 5 | 2 | 8 | 63 |
+| **rosacea** | 6 | **15** | 1 | 0 | 22 |
+| **redness** | 8 | 4 | **32** | 4 | 48 |
+| **clear** | 1 | 1 | 1 | **22** | 25 |
+
+*Error analysis (VGG16):* the best model by a clear margin, and the **only one to satisfy every
+per-class recall target (P3)**. acne — which the CNN collapsed on (recall 0.06) and ResNet50 half
+recovered (0.48) — is now solidly classified (**0.76**, 48/63), and the residual errors are
+balanced and sensible (a few acne→clear (8), redness→acne (8)) rather than a collapse. redness has
+the highest precision (0.89); `clear` again tops recall (0.88), so the `clear`=SCIN **source
+confound** (§1.1) still flatters every model equally. **The catch is fairness:** despite being the
+best overall, VGG16 has the **largest** skin-tone gap — V–VI macro-F1 **0.487** vs I–II **0.769**,
+a **0.281 gap** (§8). *The better the model got, the wider the dark-skin gap grew* — the sharpest
+version of the project's central finding.
 
 ### 7.2 Model comparison & selection (progression → final)
 
@@ -427,18 +442,17 @@ All three models are scored the **same way** on the **same frozen test set** (`t
 158 images) with `dermaface.training.metrics`. Selection metric = **macro-F1** (chosen up front for
 the class imbalance), with per-class recall and the fairness gap as tie-breakers/guards.
 
-| Model | Accuracy | Macro-F1 | Per-class recall (acne/ros/red/clear) | Fairness gap | Meets P2 (≥0.60)? |
+| Model | Accuracy | Macro-F1 | Per-class recall (acne/ros/red/clear) | Fairness gap | P1/P2/P3 |
 |---|---|---|---|---|---|
-| **Basic CNN** (baseline) | 0.35 | 0.35 | 0.06 / 0.45 / 0.42 / 0.84 | 0.064 ✅ | ❌ |
-| **ResNet50** (Iva) | 0.68 | 0.67 | 0.48 / 0.77 / 0.77 / 0.92 | 0.252 ❌ | ✅ |
-| **VGG16 (Varsha) — ✅ SELECTED** | **0.74** | **0.727** | not reported† | not reported† | ✅ |
+| **Basic CNN** (baseline) | 0.35 | 0.35 | 0.06 / 0.45 / 0.42 / 0.84 | 0.064 ✅ | ✗ / ✗ / ✗ |
+| **ResNet50** (Iva) | 0.68 | 0.67 | 0.48 / 0.77 / 0.77 / 0.92 | 0.252 ❌ | ✅ / ✅ / ✗ |
+| **VGG16 (Varsha) — ✅ SELECTED** | **0.74** | **0.727** | **0.76 / 0.68 / 0.67 / 0.88** | **0.281 ❌** | ✅ / ✅ / **✅** |
 
-†VGG16's per-class recall, confusion matrix, and fairness-by-band are **not in Varsha's reported
-summary** (she gave the four aggregate metrics only) — pull them from her auto-generated
-`vgg16_eval_report.docx` to fill P3/Fa1 and refresh this row. All three rows are **frozen-test**
-scores via the same metrics. **The tension to keep visible:** VGG16 wins on macro-F1, but the
-fairness guard is unverified for it and ResNet50 already fails it at 0.252 — so the write-up must
-state VGG16's actual fairness gap and treat it as a headline limitation if it also fails (§8, §10).
+All three rows are **frozen-test** scores via the same `dermaface.training.metrics`. VGG16 is the
+**only model to pass P1, P2 *and* P3** — an unambiguous winner on task performance. **The tension
+that must stay visible:** every model **fails the fairness guard**, and — the striking part —
+**the gap grows as the model improves** (0.064 → 0.252 → 0.281). So the winner is also the *least*
+fair; we ship it with that gap as a **headline limitation**, not a footnote (§8, §10).
 
 **The progression (how we're arriving at the final model).** (1) Establish a measurable bar
 (§0.1). (2) Train a **from-scratch CNN** to see how far raw architecture gets us on this data →
@@ -450,24 +464,25 @@ accuracy bar, **but fails the fairness guard** (gap 0.252 on the darkest-skin ba
 (5) Select on **macro-F1** → **VGG16**, then treat the fairness gap as a hard guard to report, not
 hide.
 
-**Final selection: ✅ VGG16** (accuracy 0.74, macro-F1 0.727 — highest of the three; clears P1/P2).
-*Why VGG16 over ResNet50:* higher macro-F1 (0.727 vs 0.67) and accuracy (0.74 vs 0.68) on the same
-frozen test set, with the same up-front selection metric. *Why not the Basic CNN:* it fails every
-performance target — it exists to show how far from-scratch gets on this data (not far) and to prove
-transfer learning was the right call.
+**Final selection: ✅ VGG16** (accuracy 0.74, macro-F1 0.727 — highest of the three; the **only
+model to clear P1, P2 *and* P3**). *Why VGG16 over ResNet50:* higher macro-F1 (0.727 vs 0.67) and
+accuracy (0.74 vs 0.68) on the same frozen test set, and it satisfies **every** per-class recall
+target (ResNet50 misses acne at 0.48). *Why not the Basic CNN:* it fails every performance target —
+it exists to show how far from-scratch gets on this data (not far) and to prove transfer learning
+was the right call.
 
-**Two honest asterisks on the winner (must appear in the final report):**
-1. **Fairness not yet verified for VGG16.** We have its aggregate metrics, not its per-band gap.
-   Since ResNet50's 0.25 dark-skin gap comes from **shared data coverage** (16 type-V/VI test
-   images, §8), VGG16 likely shares it. **Action:** pull VGG16's fairness numbers from
-   `vgg16_eval_report.docx`; if it fails Fa1, VGG16 still ships **with the gap as a headline
-   limitation** + remediation (more dark-skin data / DDI), because it remains the best available and
-   the alternative models are worse *and* also unfair.
-2. **App swap + plates pending the checkpoint.** `dermaface_best_vgg16.pt` isn't in hand yet; once it
-   is, it drops straight into the app (the factory already supports `vgg16`) and we regenerate the
-   FP/FN + Grad-CAM plates for VGG16.
+**The honest caveat on the winner (a headline, not a footnote):** VGG16 **fails the fairness guard**
+— band gap **0.281**, the *largest* of the three, driven by a V–VI macro-F1 of just 0.487.
+Strikingly, **the gap grows monotonically as the models improve** (CNN 0.064 → ResNet50 0.252 →
+VGG16 0.281): the better a model gets on this data, the more its gains concentrate on
+well-represented lighter skin. This is a **data-coverage** problem (only 16 type-V/VI test images,
+§8), not an algorithm quirk. VGG16 still ships — it is the best available and the alternatives are
+both weaker *and* also unfair — but **with the fairness gap stated up front and a remediation plan**
+(more dark-skin data / DDI). *Remaining task:* once `dermaface_best_vgg16.pt` is in hand it drops
+straight into the app (the factory already supports `vgg16`) and we regenerate the FP/FN + Grad-CAM
+plates for the selected model.
 
-## 8. Fairness analysis 🟡 (method decided; results landing)
+## 8. Fairness analysis ✅ (all three models scored by band)
 
 **Reporting decision:** report fairness across **skin-tone bands (I-II / III-IV / V-VI)** as
 the primary view (test-set n = 81 / 61 / 16), with the per-type I–VI table shown alongside
@@ -481,19 +496,18 @@ error moves it ~33 points. Bands mirror the grouping the DDI dataset uses.
 |---|---|---|---|---|---|
 | **Basic CNN** | 0.333 | 0.367 | 0.304 | **0.064** | ✅ |
 | **ResNet50** | 0.665 | 0.690 | **0.438** | **0.252** | ❌ |
-| **VGG16 (selected)** | — | — | — | *not reported†* | *TBD†* |
-
-†VGG16's per-band numbers weren't in Varsha's summary — attach from `vgg16_eval_report.docx`. This
-is the **one outstanding number** needed to close the report's fairness story for the selected model.
+| **VGG16 (selected)** | 0.769 | 0.707 | **0.487** | **0.281** | ❌ |
 
 **The key insight (report this, don't hide it):** the Basic CNN *passed* Fa1 only because it was
 **uniformly bad** — a small gap between three low scores is not fairness, it's incompetence spread
-evenly. As soon as a **competent** model (ResNet50) arrives, the gap **widens to 0.25**: its gains
-landed on the well-represented lighter-skin bands (I–IV) while the **V–VI band barely improved**.
-In other words, *model skill and the fairness gap grew together* — a textbook illustration of why a
-single accuracy number hides who the tool works for. **Root cause is data coverage**, not the
-algorithm: only 16 type-V/VI images in the test set (and few in training). We expect the same gap on
-VGG16; the remediation is **more dark-skin data (e.g. DDI)**, reported as required future work.
+evenly. As the models get **competent**, the gap **grows monotonically** (0.064 → 0.252 →
+**0.281**): each model's gains land on the well-represented lighter-skin bands (I–IV) while the
+**V–VI band lags far behind** (VGG16: 0.769 on I–II but only **0.487** on V–VI). In other words,
+*model skill and the fairness gap grew together, and our best model is the least fair* — a textbook
+illustration of why a single accuracy number hides who a tool works for. **Root cause is data
+coverage**, not the algorithm: only 16 type-V/VI images in the test set (and few in training). The
+remediation is **more dark-skin data (e.g. DDI)**, reported as required future work; the selected
+model ships with this gap stated as a headline limitation.
 
 **Limitation (state plainly in the report):** type VI is 1.9% of the dataset; per-type metrics
 for the darkest skin are not statistically meaningful and won't be reported as if they were.
