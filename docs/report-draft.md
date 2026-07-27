@@ -214,8 +214,13 @@ Record training environment (GPU/TPU/CPU), memory used, and training time; note 
 
 ## 12. Next steps ⬜ (to finalize)
 
-Concrete, prioritized continuations (e.g., larger/curated data, severity validation against a
-rubric, clinician feedback) — not just "collect more data."
+**Immediate timeline (Sprint 4 → submission):**
+- **Presentation practice:** Tue 28 or Wed 29 Jul, 5 pm.
+- **Record presentation:** Thu 30 Jul (time TBD).
+- **Report submission:** Fri 31 Jul.
+
+**Future work (report continuations):** concrete, prioritized continuations (e.g., larger/curated
+data, severity validation against a rubric, clinician feedback) — not just "collect more data."
 
 ## 13. Lessons learned 🟡 (in progress)
 
@@ -271,3 +276,9 @@ Process lessons so far:
 - **3-person pairing dropped** on #20 → each of Varsha / Iva / Temirlan trains one model; **compare baseline CNN vs ResNet50 vs VGG16**, consolidate metrics.
 - **Report:** Claude drafts, Iva + Hessam humanise. **Video** for Moe recorded Friday.
 - Absent: Hessam.
+
+### Sprint 4, Standup 1 — 27 July 2026 (full notes: [standups/2026-07-27-sprint4-standup1.md](standups/2026-07-27-sprint4-standup1.md))
+- **Now formally in Sprint 4.** Model-training owners confirmed: **Ali, Varsha, Iva** (Temirlan is Eval & Explainability, not a trainer). Rolando / Aparna / Temirlan have no open tasks this sprint (data + pipeline complete).
+- **Report pipeline:** Claude drafts → **Hessam + Iva** edit.
+- **Schedule:** practice Tue 28 / Wed 29 Jul 5 pm · record Thu 30 Jul · **submit Fri 31 Jul**.
+- **Status:** Ali's CNN done; Varsha's VGG16 trained (numbers pending frozen-test re-score); Iva's model in progress.
