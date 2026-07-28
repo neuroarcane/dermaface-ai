@@ -505,6 +505,17 @@ multi-source face data**, plus **confidence calibration / an out-of-distribution
 this would be trustworthy on real users. *(Figure: `realworld_failure` — in the notebook; not
 committed, license/privacy.)*
 
+**Can't we just block bad inputs? We tried — and it backfires.** The obvious guard is a **face
+detector** (reject non-face photos). But our own clinical images mostly *aren't* detectable faces
+(the ~81% no-face finding, §0.3/§1) — on our four demo images, the face detector **rejects the valid
+acne and clear examples while passing the failing selfie** (which *is* a face). It does the opposite
+of what we need. A **confidence threshold** doesn't catch it either, because the failure is
+*confident* (85%). So the app does what it honestly can — it **abstains ("Inconclusive") on
+low-confidence estimates** and **states plainly that a confident answer isn't a guarantee on
+out-of-distribution photos** — but there is **no clean v1 fix**. A real solution needs an
+**out-of-distribution detector** (feature-distance / energy score, or a "not-a-valid-photo" class)
+and **better multi-source `clear` data**. Recorded as future work (§12), not silently patched.
+
 ## 8. Fairness analysis ✅ (all three models scored by band)
 
 **Reporting decision:** report fairness across **skin-tone bands (I-II / III-IV / V-VI)** as

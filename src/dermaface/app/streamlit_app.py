@@ -148,9 +148,18 @@ def main() -> None:
     st.subheader("Estimate")
     if result.placeholder:
         st.error(result.note)
-    # In placeholder mode the numbers aren't real — show em-dashes instead of a
-    # misleading "clear / 0%" so nobody mistakes it for an actual prediction.
-    most_likely = "—" if result.placeholder else result.condition
+
+    # Abstain when a *real* prediction is below threshold: show "Inconclusive"
+    # rather than asserting a class we don't believe.
+    low_conf = not result.placeholder and result.confidence < LOW_CONFIDENCE_THRESHOLD
+    # In placeholder mode the numbers aren't real — show em-dashes so nobody mistakes
+    # them for a prediction.
+    if result.placeholder:
+        most_likely = "—"
+    elif low_conf:
+        most_likely = "Inconclusive"
+    else:
+        most_likely = result.condition
     confidence = "—" if result.placeholder else f"{result.confidence:.0%}"
     c1, c2, c3 = st.columns(3)
     c1.metric("Most likely", most_likely, help="Estimated — not a diagnosis")
@@ -158,11 +167,22 @@ def main() -> None:
     c2.metric("Severity", "Not assessed", help="Out of scope for v1 — see docs/severity-decision.md")
     c3.metric("Confidence", confidence)
 
-    # Low-confidence state: warn when a *real* prediction is below threshold.
-    if not result.placeholder and result.confidence < LOW_CONFIDENCE_THRESHOLD:
+    if low_conf:
         st.warning(
-            "⚠️ **Low confidence** — this estimate is uncertain and may well be "
-            "wrong. Please don't rely on it; see a dermatologist."
+            "⚠️ **Low confidence — treated as inconclusive.** This estimate is uncertain "
+            "and may well be wrong. Please don't rely on it; see a dermatologist."
+        )
+
+    # Honest limitation: a HIGH-confidence estimate is still not a guarantee. This model
+    # was trained on clinical dermatology images, so everyday photos (e.g. a normal
+    # selfie) are out-of-distribution and can be confidently wrong — and the confidence
+    # score does NOT detect that. A real fix needs an out-of-distribution guard / better
+    # training data (see docs/report-draft.md §7.3), not just this threshold.
+    if not result.placeholder:
+        st.caption(
+            "ℹ️ A confident estimate is **not** a guarantee. This model learned from "
+            "clinical photos; on everyday images (like a normal selfie) it can be "
+            "confidently wrong, and the confidence score won't catch that."
         )
 
     st.bar_chart(result.condition_probs)
