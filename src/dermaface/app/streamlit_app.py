@@ -26,11 +26,9 @@ from dermaface.config import load_config  # noqa: E402
 from dermaface.inference import predict  # noqa: E402
 
 DISCLAIMER = (
-    "**DermaFace AI does not provide medical advice or a diagnosis.** It is an "
-    "educational prototype that *estimates* the possible presence and severity of "
-    "common skin conditions from a photo. Results can be wrong — especially across "
-    "different skin tones, lighting, and image quality. **Always consult a licensed "
-    "dermatologist or physician.** Do not use this tool to make treatment decisions."
+    "**Not medical advice or a diagnosis.** An educational prototype — estimates can "
+    "be wrong, especially across skin tones, lighting, and image quality. **Always "
+    "consult a licensed dermatologist; don't use it for treatment decisions.**"
 )
 
 # Below this confidence, a real prediction is flagged as unreliable.
@@ -98,7 +96,7 @@ def main() -> None:
         "Upload a close-up, well-lit face photo (clinical-style)", type=["jpg", "jpeg", "png"]
     )
     consent = st.checkbox(
-        "I understand this is an educational tool and not a diagnosis.", value=False
+        "I understand this is educational, not a diagnosis.", value=False
     )
 
     # --- Edge cases ---------------------------------------------------------
@@ -117,10 +115,7 @@ def main() -> None:
     from dermaface.app.overlay import detect_face
 
     if not detect_face(image):
-        st.warning(
-            "⚠️ No face detected. Results on non-face or low-quality images are "
-            "unreliable — try a closer, well-lit, front-facing photo."
-        )
+        st.warning("⚠️ No face detected — results may be unreliable. Try a closer, well-lit photo.")
 
     # --- Results ------------------------------------------------------------
     result = predict(image, cfg)
@@ -168,10 +163,7 @@ def main() -> None:
     c3.metric("Confidence", confidence)
 
     if low_conf:
-        st.warning(
-            "⚠️ **Low confidence — treated as inconclusive.** This estimate is uncertain "
-            "and may well be wrong. Please don't rely on it; see a dermatologist."
-        )
+        st.warning("⚠️ **Low confidence — inconclusive.** Uncertain and may be wrong; see a dermatologist.")
 
     # Honest limitation: a HIGH-confidence estimate is still not a guarantee. This model
     # was trained on clinical dermatology images, so everyday photos (e.g. a normal
@@ -180,15 +172,14 @@ def main() -> None:
     # training data (see docs/report-draft.md §7.3), not just this threshold.
     if not result.placeholder:
         st.caption(
-            "ℹ️ A confident estimate is **not** a guarantee. This model learned from "
-            "clinical photos; on everyday images (like a normal selfie) it can be "
-            "confidently wrong, and the confidence score won't catch that."
+            "ℹ️ A confident estimate isn't a guarantee — the model can be confidently "
+            "wrong on everyday (non-clinical) photos."
         )
 
     st.bar_chart(result.condition_probs)
 
     st.divider()
-    st.info("👩‍⚕️ For any real concern, please see a dermatologist. " + DISCLAIMER)
+    st.info("👩‍⚕️ Not a diagnosis — for any real concern, see a dermatologist.")
 
 
 if __name__ == "__main__":
