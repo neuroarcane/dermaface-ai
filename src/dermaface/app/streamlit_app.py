@@ -88,14 +88,17 @@ def main() -> None:
     with st.sidebar:
         st.header("How to use")
         st.markdown(
-            "1. Upload a clear, front-facing, well-lit photo.\n"
+            "1. Upload a **close-up, well-lit photo of your face**, focused on the "
+            "area of concern — a clinical / dermatology-style photo works best "
+            "(not a wide everyday selfie).\n"
             "2. Confirm you understand this is educational.\n"
             "3. Review the estimate and heatmap.\n\n"
-            "No photos are stored."
+            "_Prototype — trained on clinical photos; everyday selfies may be "
+            "unreliable._ No photos are stored."
         )
 
     uploaded = st.file_uploader(
-        "Upload a clear, well-lit face photo", type=["jpg", "jpeg", "png"]
+        "Upload a close-up, well-lit face photo (clinical-style)", type=["jpg", "jpeg", "png"]
     )
     consent = st.checkbox(
         "I understand this is an educational tool and not a diagnosis.", value=False
@@ -118,8 +121,8 @@ def main() -> None:
 
     if not detect_face(image):
         st.warning(
-            "⚠️ No face detected. Results on non-face or unclear images are "
-            "unreliable — try a clearer, front-facing photo."
+            "⚠️ No face detected. Results on non-face or low-quality images are "
+            "unreliable — try a closer, well-lit, front-facing photo."
         )
 
     # --- Results ------------------------------------------------------------
