@@ -88,9 +88,7 @@ def main() -> None:
     with st.sidebar:
         st.header("How to use")
         st.markdown(
-            "1. Upload a **close-up, well-lit photo of your face**, focused on the "
-            "area of concern — a clinical / dermatology-style photo works best "
-            "(not a wide everyday selfie).\n"
+            "1. Upload a **close-up, well-lit face photo (clinical-style)**.\n"
             "2. Confirm you understand this is educational.\n"
             "3. Review the estimate and heatmap.\n\n"
             "No photos are stored."
