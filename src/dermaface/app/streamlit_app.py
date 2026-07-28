@@ -93,8 +93,7 @@ def main() -> None:
             "(not a wide everyday selfie).\n"
             "2. Confirm you understand this is educational.\n"
             "3. Review the estimate and heatmap.\n\n"
-            "_Prototype — trained on clinical photos; everyday selfies may be "
-            "unreliable._ No photos are stored."
+            "No photos are stored."
         )
 
     uploaded = st.file_uploader(
