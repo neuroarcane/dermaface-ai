@@ -1,6 +1,6 @@
 # DermaFace AI — Sprint 2, Standup 1
 
-> **Project:** DermaFace AI (mathematics / Deep Learning course) — *not* the Dental Cavity Detector.
+> **Project:** DermaFace AI — *not* the Dental Cavity Detector.
 > Project-related notes only; personal chat and other-course scheduling omitted.
 
 **Date:** 20 July 2026
@@ -24,7 +24,7 @@
 
 **#23 — Deploy to HF Spaces (Varsha)** — upload trained models to Hugging Face, verify.
 
-**#10 — Final report (Iva + Hessam)** — Ali to have Claude draft it from the repo; **Iva + Hessam edit for more natural, less "machine" language.**
+**#10 — Final report (Iva + Hessam)** — Ali to draft it from the repo; **Iva + Hessam edit for natural language.**
 
 **#24 — Video presentation (Hessam)** — record on **Friday** (no DL class) and send to Moe; fallback next week.
 
@@ -32,7 +32,7 @@
 
 ## Decisions
 1. **Drop the 3-person pairing on #20** — each person trains one model; **compare baseline CNN vs ResNet50 vs VGG16** and consolidate metrics.
-2. **Report:** Claude drafts, then Iva + Hessam humanise/edit.
+2. **Report:** drafted from the repo, then Iva + Hessam humanise/edit.
 3. **Video for Moe recorded Friday** (fallback next week).
 
 ## Blockers

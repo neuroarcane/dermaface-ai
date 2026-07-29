@@ -1,6 +1,6 @@
 # DermaFace AI — Sprint 4, Standup 1
 
-> **Project:** DermaFace AI (mathematics / Deep Learning course) — *not* the Dental Cavity Detector.
+> **Project:** DermaFace AI — *not* the Dental Cavity Detector.
 > Project-related notes only; personal chat and other-course scheduling omitted.
 
 **Date:** 27 July 2026 (Monday)
@@ -9,7 +9,7 @@
 
 ## Task allocation
 - **Model training:** **Ali, Varsha, Iva** each train a model (three-model bake-off — pick the best on a common metric set).
-- **Report:** Claude drafts from the repo → **Hessam + Iva** edit for natural, less "machine" language.
+- **Report:** drafted from the repo, then **Hessam + Iva** edit for natural language.
 - **Rolando, Aparna, Temirlan:** **no open tasks this sprint** — data acquisition + pipeline work is complete. ("Please chill.")
 
 ## Schedule (to submission)
@@ -20,7 +20,7 @@
 ## Decisions
 1. Team is **formally in Sprint 4**.
 2. **Model-training owners = Ali, Varsha, Iva** (Temirlan not a trainer — he's Eval & Explainability).
-3. **Report editing pipeline:** Claude drafts → Hessam + Iva humanise/edit.
+3. **Report editing pipeline:** drafted from the repo, then Hessam + Iva humanise/edit.
 
 ## Status going in
 - **Ali** — Basic CNN done (eval report written; real inference + Grad-CAM wired into the app, merged).

@@ -5,7 +5,6 @@
 > report at the end. Sections are marked ✅ ready · 🟡 partial · ⬜ pending as the
 > sprint progresses.
 >
-> **Course:** Mathematics / Deep Learning (Dr. Mahdieh Khalilinezhad) — project in place of exam.
 > **Team (7):** Hessam (Product Lead), Iva (ML Research), Aparna + Rolando (Data), Varsha (MLOps), Temirlan (Eval & Explainability), Ali (UI/UX).
 > **Repo:** https://github.com/neuroarcane/dermaface-ai
 
@@ -23,13 +22,6 @@ marking the regions that drove the prediction; and (4) confidence, limitations, 
 
 **It is framed as screening & education, not diagnosis** — this constraint shapes every UI
 and reporting decision (see [ethics-and-disclaimer.md](ethics-and-disclaimer.md)).
-
-> **Reading this as a story.** The interesting part of this project isn't the final 0.727 — it's
-> *how we got there*: fixing success criteria up front, a data acquisition that nearly ate two
-> sprints, decisions reversed as evidence arrived (Keras→PyTorch, severity de-scoped), a from-scratch
-> baseline that failed *on purpose* to point at the real bottleneck, and a three-model progression
-> whose plot twist was a **fairness gap that only appeared once the models got good**. **§0.3** tells
-> that arc; **§7.2** shows the model-by-model progression; the **Appendix** has the raw standup log.
 
 ## 0.1 Success criteria — set up front ✅
 
@@ -675,11 +667,11 @@ Process lessons so far:
 ### Sprint 2, Standup 1 — 20 July 2026 (full notes: [standups/2026-07-20-sprint2-standup1.md](standups/2026-07-20-sprint2-standup1.md))
 - **Training kicked off** (Varsha — critical path; full data pipeline now merged). May slip a day (other project first).
 - **3-person pairing dropped** on #20 → each of Varsha / Iva / Temirlan trains one model; **compare baseline CNN vs ResNet50 vs VGG16**, consolidate metrics.
-- **Report:** Claude drafts, Iva + Hessam humanise. **Video** for Moe recorded Friday.
+- **Report:** drafted from the repo, Iva + Hessam humanise. **Video** recorded Friday.
 - Absent: Hessam.
 
 ### Sprint 4, Standup 1 — 27 July 2026 (full notes: [standups/2026-07-27-sprint4-standup1.md](standups/2026-07-27-sprint4-standup1.md))
 - **Now formally in Sprint 4.** Model-training owners confirmed: **Ali, Varsha, Iva** (Temirlan is Eval & Explainability, not a trainer). Rolando / Aparna / Temirlan have no open tasks this sprint (data + pipeline complete).
-- **Report pipeline:** Claude drafts → **Hessam + Iva** edit.
+- **Report pipeline:** drafted from the repo, then **Hessam + Iva** edit.
 - **Schedule:** practice Tue 28 / Wed 29 Jul 5 pm · record Thu 30 Jul · **submit Fri 31 Jul**.
 - **Status:** Ali's CNN done; Varsha's VGG16 trained (numbers pending frozen-test re-score); Iva's model in progress.
