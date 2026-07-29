@@ -51,3 +51,7 @@ lightning_logs/
 
 # Generated example-image plates — never commit (Fitzpatrick license forbids public image hosting)
 /docs/eval_reports/figures/
+
+# Rendered final report (contains dataset images — never commit)
+notebooks/DermaFace_Final_Report.RENDERED.*
+/DermaFace_Final_Report_v3.pdf
